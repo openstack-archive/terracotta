@@ -704,7 +704,7 @@ def vms_by_host(nova, host):
      :rtype: list(str)
     """
     return [str(vm.id) for vm in nova.servers.list()
-            if vm_hostname(vm) == host]
+            if (vm_hostname(vm) == host and str(getattr(vm, 'OS-EXT-STS:vm_state')) == 'active')]
 
 
 @contract
