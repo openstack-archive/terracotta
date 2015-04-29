@@ -38,7 +38,7 @@ class DbCleaner(TestCase):
                 'log_directory': 'dir',
                 'log_level': 2,
                 'db_cleaner_interval': str(time_interval)}
-            paths = [cleaner.DEFAILT_CONFIG_PATH, cleaner.CONFIG_PATH]
+            paths = [cleaner.DEFAULT_CONFIG_PATH, cleaner.CONFIG_PATH]
             fields = cleaner.REQUIRED_FIELDS
             expect(cleaner).read_and_validate_config(paths, fields). \
                 and_return(config).once()

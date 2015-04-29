@@ -170,7 +170,7 @@ class GlobalManager(TestCase):
                 'global_manager_host': 'localhost',
                 'global_manager_port': 8080,
                 'ether_wake_interface': 'eth0'}
-            paths = [manager.DEFAILT_CONFIG_PATH, manager.CONFIG_PATH]
+            paths = [manager.DEFAULT_CONFIG_PATH, manager.CONFIG_PATH]
             fields = manager.REQUIRED_FIELDS
             expect(manager).read_and_validate_config(paths, fields). \
                 and_return(config).once()

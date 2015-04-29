@@ -114,7 +114,7 @@ def start():
     :return: The final state.
      :rtype: dict(str: *)
     """
-    config = read_and_validate_config([DEFAILT_CONFIG_PATH, CONFIG_PATH],
+    config = read_and_validate_config([DEFAULT_CONFIG_PATH, CONFIG_PATH],
                                       REQUIRED_FIELDS)
 
     common.init_logging(

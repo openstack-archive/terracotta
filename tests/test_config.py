@@ -25,13 +25,13 @@ class Config(TestCase):
 
     @qc
     def read_default_config():
-        paths = [config.DEFAILT_CONFIG_PATH]
+        paths = [config.DEFAULT_CONFIG_PATH]
         test_config = config.read_config(paths)
         assert config.validate_config(test_config, config.REQUIRED_FIELDS)
 
     @qc
     def read_config():
-        paths = [config.DEFAILT_CONFIG_PATH, config.CONFIG_PATH]
+        paths = [config.DEFAULT_CONFIG_PATH, config.CONFIG_PATH]
         test_config = config.read_config(paths)
         assert config.validate_config(test_config, config.REQUIRED_FIELDS)
 
@@ -75,7 +75,7 @@ class Config(TestCase):
     ):
         with MockTransaction:
             test_config = dict(zip(x, x))
-            paths = [config.DEFAILT_CONFIG_PATH, config.CONFIG_PATH]
+            paths = [config.DEFAULT_CONFIG_PATH, config.CONFIG_PATH]
             expect(config).read_config(paths).and_return(test_config).once()
             expect(config).validate_config(test_config, y). \
                 and_return(False).once()

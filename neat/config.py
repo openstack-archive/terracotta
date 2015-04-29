@@ -25,7 +25,7 @@ log = logging.getLogger(__name__)
 
 
 # This is the default config, which should not be modified
-DEFAILT_CONFIG_PATH = os.path.join(os.path.dirname(__file__),
+DEFAULT_CONFIG_PATH = os.path.join(os.path.dirname(__file__),
                                    '..',
                                    'neat.conf')
 

@@ -107,7 +107,7 @@ ERRORS = {
 
 @contract
 def raise_error(status_code):
-    """ Raise and HTTPResponse exception with the specified status code.
+    """ Raise an HTTPResponse exception with the specified status code.
 
     :param status_code: An HTTP status code of the error.
      :type status_code: int
@@ -163,7 +163,7 @@ def validate_params(user, password, params):
 def start():
     """ Start the global manager web service.
     """
-    config = read_and_validate_config([DEFAILT_CONFIG_PATH, CONFIG_PATH],
+    config = read_and_validate_config([DEFAULT_CONFIG_PATH, CONFIG_PATH],
                                       REQUIRED_FIELDS)
 
     common.init_logging(

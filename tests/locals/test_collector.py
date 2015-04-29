@@ -41,7 +41,7 @@ class Collector(TestCase):
                 'log_level': 2,
                 'local_data_directory': 'data_dir',
                 'data_collector_interval': str(time_interval)}
-            paths = [collector.DEFAILT_CONFIG_PATH, collector.CONFIG_PATH]
+            paths = [collector.DEFAULT_CONFIG_PATH, collector.CONFIG_PATH]
             fields = collector.REQUIRED_FIELDS
             expect(collector).read_and_validate_config(paths, fields). \
                 and_return(config).once()
