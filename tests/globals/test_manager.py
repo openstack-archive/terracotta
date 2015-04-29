@@ -17,7 +17,7 @@ from pyqcy import *
 
 import bottle
 from hashlib import sha1
-from novaclient.v2 import client
+from novaclient import client
 import time
 import subprocess
 
@@ -195,7 +195,7 @@ class GlobalManager(TestCase):
                       'compute_hosts': 'host1, host2'}
             expect(manager).init_db('db').and_return(db).once()
             expect(client).Client(
-                'user', 'password', 'tenant', 'url',
+                2, 'user', 'password', 'tenant', 'url',
                 service_type='compute'). \
                 and_return(nova).once()
             expect(common).parse_compute_hosts('host1, host2'). \

@@ -74,7 +74,7 @@ from neat.contracts_extra import *
 import bottle
 from hashlib import sha1
 import novaclient
-from novaclient.v2 import client
+from novaclient import client
 import time
 import subprocess
 
@@ -270,7 +270,8 @@ def init_state(config):
     """
     return {'previous_time': 0,
             'db': init_db(config['sql_connection']),
-            'nova': client.Client(config['os_admin_user'],
+            'nova': client.Client(2,
+                                  config['os_admin_user'],
                                   config['os_admin_password'],
                                   config['os_admin_tenant_name'],
                                   config['os_auth_url'],
