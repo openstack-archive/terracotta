@@ -1,5 +1,4 @@
-# Copyright 2014 - Mirantis, Inc.
-# Copyright 2015 - StackStorm, Inc.
+# Copyright 2015 Huawei Technologies Co. Ltd
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -71,116 +70,11 @@ def get_executor_client():
     return _EXECUTOR_CLIENT
 
 
-class EngineServer(object):
+class GlobalManagerServer(object):
     """RPC Engine server."""
 
-    def __init__(self, engine):
-        self._engine = engine
-
-    def start_workflow(self, rpc_ctx, workflow_name, workflow_input, params):
-        """Receives calls over RPC to start workflows on engine.
-
-        :param rpc_ctx: RPC request context.
-        :return: Workflow execution.
-        """
-
-        LOG.info(
-            "Received RPC request 'start_workflow'[rpc_ctx=%s,"
-            " workflow_name=%s, workflow_input=%s, params=%s]"
-            % (rpc_ctx, workflow_name, workflow_input, params)
-        )
-
-        return self._engine.start_workflow(
-            workflow_name,
-            workflow_input,
-            **params
-        )
-
-    def on_task_state_change(self, rpc_ctx, task_ex_id, state):
-        return self._engine.on_task_state_change(task_ex_id, state)
-
-    def on_action_complete(self, rpc_ctx, action_ex_id, result_data,
-                           result_error):
-        """Receives RPC calls to communicate action result to engine.
-
-        :param rpc_ctx: RPC request context.
-        :param action_ex_id: Action execution id.
-        :return: Action execution.
-        """
-
-        result = wf_utils.Result(result_data, result_error)
-
-        LOG.info(
-            "Received RPC request 'on_action_complete'[rpc_ctx=%s,"
-            " action_ex_id=%s, result=%s]" % (rpc_ctx, action_ex_id, result)
-        )
-
-        return self._engine.on_action_complete(action_ex_id, result)
-
-    def pause_workflow(self, rpc_ctx, execution_id):
-        """Receives calls over RPC to pause workflows on engine.
-
-        :param rpc_ctx: Request context.
-        :return: Workflow execution.
-        """
-
-        LOG.info(
-            "Received RPC request 'pause_workflow'[rpc_ctx=%s,"
-            " execution_id=%s]" % (rpc_ctx, execution_id)
-        )
-
-        return self._engine.pause_workflow(execution_id)
-
-    def resume_workflow(self, rpc_ctx, execution_id):
-        """Receives calls over RPC to resume workflows on engine.
-
-        :param rpc_ctx: RPC request context.
-        :return: Workflow execution.
-        """
-
-        LOG.info(
-            "Received RPC request 'resume_workflow'[rpc_ctx=%s,"
-            " execution_id=%s]" % (rpc_ctx, execution_id)
-        )
-
-        return self._engine.resume_workflow(execution_id)
-
-    def stop_workflow(self, rpc_ctx, execution_id, state, message=None):
-        """Receives calls over RPC to stop workflows on engine.
-
-        Sets execution state to SUCCESS or ERROR. No more tasks will be
-        scheduled. Running tasks won't be killed, but their results
-        will be ignored.
-
-        :param rpc_ctx: RPC request context.
-        :param execution_id: Workflow execution id.
-        :param state: State assigned to the workflow. Permitted states are
-            SUCCESS or ERROR.
-        :param message: Optional information string.
-
-        :return: Workflow execution.
-        """
-
-        LOG.info(
-            "Received RPC request 'stop_workflow'[rpc_ctx=%s, execution_id=%s,"
-            " state=%s, message=%s]" % (rpc_ctx, execution_id, state, message)
-        )
-
-        return self._engine.stop_workflow(execution_id, state, message)
-
-    def rollback_workflow(self, rpc_ctx, execution_id):
-        """Receives calls over RPC to rollback workflows on engine.
-
-        :param rpc_ctx: RPC request context.
-        :return: Workflow execution.
-        """
-
-        LOG.info(
-            "Received RPC request 'rollback_workflow'[rpc_ctx=%s,"
-            " execution_id=%s]" % (rpc_ctx, execution_id)
-        )
-
-        return self._engine.resume_workflow(execution_id)
+    def __init__(self, manager):
+        self._manager = manager
 
 
 def wrap_messaging_exception(method):
@@ -330,11 +224,11 @@ class EngineClient(base.Engine):
         )
 
 
-class ExecutorServer(object):
+class LocalManagerServer(object):
     """RPC Executor server."""
 
-    def __init__(self, executor):
-        self._executor = executor
+    def __init__(self, manager):
+        self._executor = manager
 
     def run_action(self, rpc_ctx, action_ex_id, action_class_str,
                    attributes, params):

@@ -25,22 +25,20 @@ eventlet.monkey_patch(
 
 import os
 
-# If ../mistral/__init__.py exists, add ../ to Python search path, so that
-# it will override what happens to be installed in /usr/(local/)lib/python...
 POSSIBLE_TOPDIR = os.path.normpath(os.path.join(os.path.abspath(sys.argv[0]),
-                                   os.pardir,
-                                   os.pardir))
+                                                os.pardir,
+                                                os.pardir))
 if os.path.exists(os.path.join(POSSIBLE_TOPDIR, 'mistral', '__init__.py')):
     sys.path.insert(0, POSSIBLE_TOPDIR)
 
 from oslo_config import cfg
 from oslo_log import log as logging
 import oslo_messaging as messaging
-from wsgiref import simple_server
 
-from mistral.api import app
 from terracotta import config
 from terracotta import rpc
+from terracotta.locals import collector
+from terracotta.locals import manager as local_mgr
 from terracotta.globals import manager as global_mgr
 
 from mistral import context as ctx
@@ -55,41 +53,14 @@ from mistral import version
 LOG = logging.getLogger(__name__)
 
 
-def launch_executor(transport):
+def launch_lm(transport):
     target = messaging.Target(
-        topic=cfg.CONF.executor.topic,
-        server=cfg.CONF.executor.host
+        topic=cfg.CONF.local_manager.topic,
+        server=cfg.CONF.local_manager.host
     )
 
-    executor_v2 = def_executor.DefaultExecutor(rpc.get_engine_client())
-
-    endpoints = [rpc.ExecutorServer(executor_v2)]
-
-    server = messaging.get_rpc_server(
-        transport,
-        target,
-        endpoints,
-        executor='eventlet',
-        serializer=ctx.RpcContextSerializer(ctx.JsonPayloadSerializer())
-    )
-
-    server.start()
-    server.wait()
-
-
-def launch_engine(transport):
-    target = messaging.Target(
-        topic=cfg.CONF.engine.topic,
-        server=cfg.CONF.engine.host
-    )
-
-    engine_v2 = def_eng.DefaultEngine(rpc.get_engine_client())
-    endpoints = [rpc.EngineServer(engine_v2)]
-
-
-    # Setup scheduler in engine.
-    db_api.setup_db()
-    scheduler.setup()
+    local_manager = local_mgr.LocalManager()
+    endpoints = [rpc.LocalManagerServer(local_manager)]
 
     server = messaging.get_rpc_server(
         transport,
@@ -109,13 +80,8 @@ def launch_gm(transport):
         server=cfg.CONF.global_manager.host
     )
 
-    engine_v2 = def_eng.DefaultEngine(rpc.get_engine_client())
-
-    endpoints = [rpc.EngineServer(engine_v2)]
-
-    # Setup scheduler in engine.
-    db_api.setup_db()
-    scheduler.setup()
+    global_manager = global_mgr.GlobalManager()
+    endpoints = [rpc.GlobalManagerServer(global_manager)]
 
     server = messaging.get_rpc_server(
         transport,
@@ -129,24 +95,28 @@ def launch_gm(transport):
     server.wait()
 
 
-def launch_api(transport):
-    host = cfg.CONF.api.host
-    port = cfg.CONF.api.port
-
-    server = simple_server.make_server(
-        host,
-        port,
-        app.setup_app()
+def launch_collector(transport):
+    target = messaging.Target(
+        topic=cfg.CONF.local_collector.topic,
+        server=cfg.CONF.local_collector.host
     )
 
-    LOG.info("Mistral API is serving on http://%s:%s (PID=%s)" %
-             (host, port, os.getpid()))
+    global_manager = collector.Collector()
+    endpoints = [rpc.GlobalManagerServer(global_manager)]
 
-    server.serve_forever()
+    server = messaging.get_rpc_server(
+        transport,
+        target,
+        endpoints,
+        executor='eventlet',
+        serializer=ctx.RpcContextSerializer(ctx.JsonPayloadSerializer())
+    )
+
+    server.start()
+    server.wait()
 
 
 def launch_any(transport, options):
-    # Launch the servers on different threads.
     threads = [eventlet.spawn(LAUNCH_OPTIONS[option], transport)
                for option in options]
 
@@ -156,7 +126,6 @@ def launch_any(transport, options):
 
 
 LAUNCH_OPTIONS = {
-    # 'api': launch_api,
     'global-manager': launch_gm,
     'local-collector': launch_collector,
     'local-manager': launch_lm
@@ -175,7 +144,7 @@ Terracotta Dynamic Scheduling Service, version %s
 """ % version.version_string()
 
 
-def print_server_info():
+def print_service_info():
     print(TERRACOTTA_TITLE)
 
     comp_str = ("[%s]" % ','.join(LAUNCH_OPTIONS)
@@ -187,16 +156,10 @@ def print_server_info():
 def main():
     try:
         config.parse_args()
-        print_server_info()
+        print_service_info()
         logging.setup(cfg.CONF, 'Terracotta')
         transport = rpc.get_transport()
 
-        # Validate launch option.
-        if set(cfg.CONF.server) - set(LAUNCH_OPTIONS.keys()):
-            raise Exception('Valid options are all or any combination of '
-                            'api, engine, and executor.')
-
-        # Launch distinct set of server(s).
         launch_any(transport, set(cfg.CONF.server))
 
     except RuntimeError as excp:
