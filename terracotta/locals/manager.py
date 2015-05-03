@@ -118,12 +118,13 @@ from terracotta.openstack.common import threadgroup
 from terracotta.utils import db_utils
 
 
-log = logging.getLogger(__name__)
+CONF = cfg.CONF
+LOG = logging.getLogger(__name__)
 
 
 class LocalManager(periodic_task.PeriodicTasks):
     def __init__(self):
-        super(Service, self).__init__()
+        super(LocalManager, self).__init__()
         self.state = self.init_state()
         self.tg = threadgroup.ThreadGroup()
         self.tg.add_dynamic_timer(
@@ -193,6 +194,7 @@ class LocalManager(periodic_task.PeriodicTasks):
         """
         LOG.info('Started an iteration')
         state = self.state
+
         vm_path = common.build_local_vm_path(CONF.local_data_directory)
         vm_cpu_mhz = self.get_local_vm_data(vm_path)
         vm_ram = self.get_ram(state['vir_connection'], vm_cpu_mhz.keys())

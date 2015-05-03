@@ -28,7 +28,7 @@ import os
 POSSIBLE_TOPDIR = os.path.normpath(os.path.join(os.path.abspath(sys.argv[0]),
                                                 os.pardir,
                                                 os.pardir))
-if os.path.exists(os.path.join(POSSIBLE_TOPDIR, 'mistral', '__init__.py')):
+if os.path.exists(os.path.join(POSSIBLE_TOPDIR, 'terracotta', '__init__.py')):
     sys.path.insert(0, POSSIBLE_TOPDIR)
 
 from oslo_config import cfg
@@ -40,14 +40,7 @@ from terracotta import rpc
 from terracotta.locals import collector
 from terracotta.locals import manager as local_mgr
 from terracotta.globals import manager as global_mgr
-
-from mistral import context as ctx
-from mistral.db.v2 import api as db_api
-from mistral.engine import default_engine as def_eng
-from mistral.engine import default_executor as def_executor
-from mistral.engine import rpc
-from mistral.services import scheduler
-from mistral import version
+from terracotta import version
 
 
 LOG = logging.getLogger(__name__)

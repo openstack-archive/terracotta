@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -90,37 +90,47 @@ invoked, the component performs the following steps:
    seconds.
 """
 
+from collections import deque
 from contracts import contract
-from neat.contracts_primitive import *
-from neat.contracts_extra import *
-
+import libvirt
 import os
 import time
-from collections import deque
-import libvirt
 
-import neat.common as common
-from neat.config import *
-from neat.db_utils import *
+from oslo_config import cfg
+from oslo_log import log as logging
 
-import logging
+from terracotta import common
+from terracotta.contracts_extra import *
+from terracotta.contracts_primitive import *
+from terracotta.openstack.common import periodic_task
+from terracotta.openstack.common import threadgroup
+from terracotta.utils import db_utils
 
-from terracotta.openstack.common import service
+
+CONF = cfg.CONF
+LOG = logging.getLogger(__name__)
 
 
-log = logging.getLogger(__name__)
-
-class Collector(service.Service):
-
+class Collector(periodic_task.PeriodicTasks):
     def __init__(self):
-        super(Service, self).__init__()
-        self.state = self.init_state()
+        super(Collector, self).__init__()
 
+        vm_path = common.build_local_vm_path(CONF.local_data_directory)
+        if not os.access(vm_path, os.F_OK):
+            os.makedirs(vm_path)
+            LOG.info('Created a local VM data directory: %s', vm_path)
+        else:
+            self.cleanup_all_local_data(CONF.local_data_directory)
+            LOG.info('Creaned up the local data directory: %s',
+                     CONF.local_data_directory)
+
+        self.state = self.init_state()
+        self.tg = threadgroup.ThreadGroup()
         self.tg.add_dynamic_timer(
-            self.execute,
-            initial_delay=initial_delay,
-            periodic_interval_max=self.periodic_interval_max,
-            self.state
+            self.run_periodic_tasks,
+            initial_delay=None,
+            periodic_interval_max=1,
+            context=None
         )
 
     @contract
@@ -136,15 +146,15 @@ class Collector(service.Service):
         vir_connection = libvirt.openReadOnly(None)
         if vir_connection is None:
             message = 'Failed to open a connection to the hypervisor'
-            log.critical(message)
+            LOG.critical(message)
             raise OSError(message)
 
         hostname = vir_connection.getHostname()
-        host_cpu_mhz, host_ram = get_host_characteristics(vir_connection)
+        host_cpu_mhz, host_ram = self.get_host_characteristics(vir_connection)
         physical_cpus = common.physical_cpu_count(vir_connection)
-        host_cpu_usable_by_vms = float(config['host_cpu_usable_by_vms'])
+        host_cpu_usable_by_vms = float(CONF.host_cpu_usable_by_vms)
 
-        db = init_db(config['sql_connection'])
+        db = db_utils.init_db()
         db.update_host(hostname,
                        int(host_cpu_mhz * host_cpu_usable_by_vms),
                        physical_cpus,
@@ -159,131 +169,122 @@ class Collector(service.Service):
                 'vir_connection': vir_connection,
                 'hostname': hostname,
                 'host_cpu_overload_threshold':
-                    float(config['host_cpu_overload_threshold']) * \
+                    float(CONF.host_cpu_overload_threshold) * \
                     host_cpu_usable_by_vms,
                 'physical_cpus': physical_cpus,
                 'physical_cpu_mhz': host_cpu_mhz,
                 'physical_core_mhz': host_cpu_mhz / physical_cpus,
                 'db': db}
 
-
-    def execute(self, state):
+    @periodic_task.periodic_task
+    def execute(self):
         """ Execute a data collection iteration.
 
-    1. Read the names of the files from the <local_data_directory>/vm
-       directory to determine the list of VMs running on the host at the
-       last data collection.
+        1. Read the names of the files from the <local_data_directory>/vm
+           directory to determine the list of VMs running on the host at the
+           last data collection.
 
-    2. Call the Nova API to obtain the list of VMs that are currently
-       active on the host.
+        2. Call the Nova API to obtain the list of VMs that are currently
+           active on the host.
 
-    3. Compare the old and new lists of VMs and determine the newly added
-       or removed VMs.
+        3. Compare the old and new lists of VMs and determine the newly added
+           or removed VMs.
 
-    4. Delete the files from the <local_data_directory>/vm directory
-       corresponding to the VMs that have been removed from the host.
+        4. Delete the files from the <local_data_directory>/vm directory
+           corresponding to the VMs that have been removed from the host.
 
-    5. Fetch the latest data_collector_data_length data values from the
-       central database for each newly added VM using the database
-       connection information specified in the sql_connection option and
-       save the data in the <local_data_directory>/vm directory.
+        5. Fetch the latest data_collector_data_length data values from the
+           central database for each newly added VM using the database
+           connection information specified in the sql_connection option and
+           save the data in the <local_data_directory>/vm directory.
 
-    6. Call the Libvirt API to obtain the CPU time for each VM active on
-       the host. Transform the data obtained from the Libvirt API into the
-       average MHz according to the frequency of the host's CPU and time
-       interval from the previous data collection.
+        6. Call the Libvirt API to obtain the CPU time for each VM active on
+           the host. Transform the data obtained from the Libvirt API into the
+           average MHz according to the frequency of the host's CPU and time
+           interval from the previous data collection.
 
-    8. Store the converted data in the <local_data_directory>/vm
-       directory in separate files for each VM, and submit the data to the
-       central database.
-
-        :param config: A config dictionary.
-         :type config: dict(str: *)
-
-        :param state: A state dictionary.
-         :type state: dict(str: *)
-
-        :return: The updated state dictionary.
-         :rtype: dict(str: *)
+        8. Store the converted data in the <local_data_directory>/vm
+           directory in separate files for each VM, and submit the data to the
+           central database.
         """
-        log.info('Started an iteration')
-        vm_path = common.build_local_vm_path(config['local_data_directory'])
-        host_path = common.build_local_host_path(config['local_data_directory'])
-        data_length = int(config['data_collector_data_length'])
-        vms_previous = get_previous_vms(vm_path)
-        vms_current = get_current_vms(state['vir_connection'])
+        LOG.info('Started an iteration')
+        state = self.state
 
-        vms_added = get_added_vms(vms_previous, vms_current.keys())
+        vm_path = common.build_local_vm_path(CONF.local_data_directory)
+        host_path = common.build_local_host_path(CONF.local_data_directory)
+        data_length = int(CONF.data_collector_data_length)
+        vms_previous = self.get_previous_vms(vm_path)
+        vms_current = self.get_current_vms(state['vir_connection'])
+
+        vms_added = self.get_added_vms(vms_previous, vms_current.keys())
         added_vm_data = dict()
         if vms_added:
-            if log.isEnabledFor(logging.DEBUG):
-                log.debug('Added VMs: %s', str(vms_added))
-
+            LOG.debug('Added VMs: %s', str(vms_added))
             for i, vm in enumerate(vms_added):
                 if vms_current[vm] != libvirt.VIR_DOMAIN_RUNNING:
                     del vms_added[i]
                     del vms_current[vm]
-                    if log.isEnabledFor(logging.DEBUG):
-                        log.debug('Added VM %s skipped as migrating in', vm)
+                    LOG.debug('Added VM %s skipped as migrating in', vm)
 
-            added_vm_data = fetch_remote_data(state['db'],
-                                              data_length,
-                                              vms_added)
-            if log.isEnabledFor(logging.DEBUG):
-                log.debug('Fetched remote data: %s', str(added_vm_data))
-            write_vm_data_locally(vm_path, added_vm_data, data_length)
+            added_vm_data = self.fetch_remote_data(state['db'],
+                                                   data_length,
+                                                   vms_added)
+            LOG.debug('Fetched remote data: %s', str(added_vm_data))
+            self.write_vm_data_locally(vm_path, added_vm_data, data_length)
 
-        vms_removed = get_removed_vms(vms_previous, vms_current.keys())
+        vms_removed = self.get_removed_vms(vms_previous, vms_current.keys())
         if vms_removed:
-            if log.isEnabledFor(logging.DEBUG):
-                log.debug('Removed VMs: %s', str(vms_removed))
-            cleanup_local_vm_data(vm_path, vms_removed)
+            LOG.debug('Removed VMs: %s', str(vms_removed))
+            self.cleanup_local_vm_data(vm_path, vms_removed)
             for vm in vms_removed:
                 del state['previous_cpu_time'][vm]
                 del state['previous_cpu_mhz'][vm]
 
-        log.info('Started VM data collection')
+        LOG.info('Started VM data collection')
         current_time = time.time()
-        (cpu_time, cpu_mhz) = get_cpu_mhz(state['vir_connection'],
-                                          state['physical_core_mhz'],
-                                          state['previous_cpu_time'],
-                                          state['previous_time'],
-                                          current_time,
-                                          vms_current.keys(),
-                                          state['previous_cpu_mhz'],
-                                          added_vm_data)
-        log.info('Completed VM data collection')
+        (cpu_time, cpu_mhz) = self.get_cpu_mhz(state['vir_connection'],
+                                               state['physical_core_mhz'],
+                                               state['previous_cpu_time'],
+                                               state['previous_time'],
+                                               current_time,
+                                               vms_current.keys(),
+                                               state['previous_cpu_mhz'],
+                                               added_vm_data)
+        LOG.info('Completed VM data collection')
 
-        log.info('Started host data collection')
-        (host_cpu_time_total,
-         host_cpu_time_busy,
-         host_cpu_mhz) = get_host_cpu_mhz(state['physical_cpu_mhz'],
-                                          state['previous_host_cpu_time_total'],
-                                          state['previous_host_cpu_time_busy'])
-        log.info('Completed host data collection')
+        LOG.info('Started host data collection')
+        (host_cpu_time_total, host_cpu_time_busy, host_cpu_mhz) = \
+            self.get_host_cpu_mhz(
+                state['physical_cpu_mhz'],
+                state['previous_host_cpu_time_total'],
+                state['previous_host_cpu_time_busy']
+            )
+        LOG.info('Completed host data collection')
 
         if state['previous_time'] > 0:
-            append_vm_data_locally(vm_path, cpu_mhz, data_length)
-            append_vm_data_remotely(state['db'], cpu_mhz)
+            self.append_vm_data_locally(vm_path, cpu_mhz, data_length)
+            self.append_vm_data_remotely(state['db'], cpu_mhz)
 
             total_vms_cpu_mhz = sum(cpu_mhz.values())
             host_cpu_mhz_hypervisor = host_cpu_mhz - total_vms_cpu_mhz
             if host_cpu_mhz_hypervisor < 0:
                 host_cpu_mhz_hypervisor = 0
             total_cpu_mhz = total_vms_cpu_mhz + host_cpu_mhz_hypervisor
-            append_host_data_locally(host_path, host_cpu_mhz_hypervisor, data_length)
-            append_host_data_remotely(state['db'],
-                                      state['hostname'],
-                                      host_cpu_mhz_hypervisor)
+            self.append_host_data_locally(host_path, host_cpu_mhz_hypervisor,
+                                          data_length)
+            self.append_host_data_remotely(state['db'],
+                                           state['hostname'],
+                                           host_cpu_mhz_hypervisor)
 
-            if log.isEnabledFor(logging.DEBUG):
-                log.debug('Collected VM CPU MHz: %s', str(cpu_mhz))
-                log.debug('Collected total VMs CPU MHz: %s', str(total_vms_cpu_mhz))
-                log.debug('Collected hypervisor CPU MHz: %s', str(host_cpu_mhz_hypervisor))
-                log.debug('Collected host CPU MHz: %s', str(host_cpu_mhz))
-                log.debug('Collected total CPU MHz: %s', str(total_cpu_mhz))
+            LOG.debug('Collected VM CPU MHz: %s', str(cpu_mhz))
+            LOG.debug('Collected total VMs CPU MHz: %s',
+                      str(total_vms_cpu_mhz))
+            LOG.debug('Collected hypervisor CPU MHz: %s',
+                      str(host_cpu_mhz_hypervisor))
+            LOG.debug('Collected host CPU MHz: %s', str(host_cpu_mhz))
+            LOG.debug('Collected total CPU MHz: %s', str(total_cpu_mhz))
 
-            state['previous_overload'] = log_host_overload(
+            state['previous_overload'] = self.log_host_overload(
                 state['db'],
                 state['host_cpu_overload_threshold'],
                 state['hostname'],
@@ -297,8 +298,8 @@ class Collector(service.Service):
         state['previous_host_cpu_time_total'] = host_cpu_time_total
         state['previous_host_cpu_time_busy'] = host_cpu_time_busy
 
-        log.info('Completed an iteration')
-        return state
+        LOG.info('Completed an iteration')
+        self.state = state
 
 
     @contract
@@ -347,7 +348,7 @@ class Collector(service.Service):
         :return: A list of VM UUIDs added since the last time frame.
          :rtype: list(str)
         """
-        return substract_lists(current_vms, previous_vms)
+        return self.substract_lists(current_vms, previous_vms)
 
 
     @contract
@@ -567,45 +568,42 @@ class Collector(service.Service):
          :rtype: tuple(dict(str : int), dict(str : int))
         """
         previous_vms = previous_cpu_time.keys()
-        added_vms = get_added_vms(previous_vms, current_vms)
-        removed_vms = get_removed_vms(previous_vms, current_vms)
+        added_vms = self.get_added_vms(previous_vms, current_vms)
+        removed_vms = self.get_removed_vms(previous_vms, current_vms)
         cpu_mhz = {}
 
         for uuid in removed_vms:
             del previous_cpu_time[uuid]
 
         for uuid, cpu_time in previous_cpu_time.items():
-            current_cpu_time = get_cpu_time(vir_connection, uuid)
+            current_cpu_time = self.get_cpu_time(vir_connection, uuid)
             if current_cpu_time < cpu_time:
-                if log.isEnabledFor(logging.DEBUG):
-                    log.debug('VM %s: current_cpu_time < cpu_time: ' +
-                              'previous CPU time %d, ' +
-                              'current CPU time %d',
-                              uuid, cpu_time, current_cpu_time)
-                    log.debug('VM %s: using previous CPU MHz %d',
-                              uuid, previous_cpu_mhz[uuid])
+                LOG.debug('VM %s: current_cpu_time < cpu_time: ' +
+                          'previous CPU time %d, ' +
+                          'current CPU time %d',
+                          uuid, cpu_time, current_cpu_time)
+                LOG.debug('VM %s: using previous CPU MHz %d',
+                          uuid, previous_cpu_mhz[uuid])
                 cpu_mhz[uuid] = previous_cpu_mhz[uuid]
             else:
-                if log.isEnabledFor(logging.DEBUG):
-                    log.debug('VM %s: previous CPU time %d, ' +
-                              'current CPU time %d, ' +
-                              'previous time %.10f, ' +
-                              'current time %.10f',
-                              uuid, cpu_time, current_cpu_time,
-                              previous_time, current_time)
-                cpu_mhz[uuid] = calculate_cpu_mhz(physical_core_mhz,
-                                                  previous_time,
-                                                  current_time,
-                                                  cpu_time,
-                                                  current_cpu_time)
+                LOG.debug('VM %s: previous CPU time %d, ' +
+                          'current CPU time %d, ' +
+                          'previous time %.10f, ' +
+                          'current time %.10f',
+                          uuid, cpu_time, current_cpu_time,
+                          previous_time, current_time)
+                cpu_mhz[uuid] = self.calculate_cpu_mhz(physical_core_mhz,
+                                                       previous_time,
+                                                       current_time,
+                                                       cpu_time,
+                                                       current_cpu_time)
             previous_cpu_time[uuid] = current_cpu_time
-            if log.isEnabledFor(logging.DEBUG):
-                log.debug('VM %s: CPU MHz %d', uuid, cpu_mhz[uuid])
+            LOG.debug('VM %s: CPU MHz %d', uuid, cpu_mhz[uuid])
 
         for uuid in added_vms:
             if added_vm_data[uuid]:
                 cpu_mhz[uuid] = added_vm_data[uuid][-1]
-            previous_cpu_time[uuid] = get_cpu_time(vir_connection, uuid)
+            previous_cpu_time[uuid] = self.get_cpu_time(vir_connection, uuid)
 
         return previous_cpu_time, cpu_mhz
 
@@ -658,7 +656,8 @@ class Collector(service.Service):
 
 
     @contract
-    def get_host_cpu_mhz(self, cpu_mhz, previous_cpu_time_total, previous_cpu_time_busy):
+    def get_host_cpu_mhz(self, cpu_mhz, previous_cpu_time_total,
+                         previous_cpu_time_busy):
         """ Get the average CPU utilization in MHz for a set of VMs.
 
         :param cpu_mhz: The total frequency of the physical CPU in MHz.
@@ -677,15 +676,15 @@ class Collector(service.Service):
         cpu_usage = int(cpu_mhz * (cpu_time_busy - previous_cpu_time_busy) / \
                         (cpu_time_total - previous_cpu_time_total))
         if cpu_usage < 0:
-            raise ValueError('The host CPU usage in MHz must be >=0, but it is: ' + str(cpu_usage) +
-                             '; cpu_mhz=' + str(cpu_mhz) +
-                             '; previous_cpu_time_total=' + str(previous_cpu_time_total) +
-                             '; cpu_time_total=' + str(cpu_time_total) +
-                             '; previous_cpu_time_busy=' + str(previous_cpu_time_busy) +
-                             '; cpu_time_busy=' + str(cpu_time_busy))
-        return cpu_time_total, \
-               cpu_time_busy, \
-               cpu_usage
+            raise ValueError(
+                'The host CPU usage in MHz must be >=0, but it is: ' + str(
+                    cpu_usage) +
+                '; cpu_mhz=' + str(cpu_mhz) +
+                '; previous_cpu_time_total=' + str(previous_cpu_time_total) +
+                '; cpu_time_total=' + str(cpu_time_total) +
+                '; previous_cpu_time_busy=' + str(previous_cpu_time_busy) +
+                '; cpu_time_busy=' + str(cpu_time_busy))
+        return cpu_time_total, cpu_time_busy, cpu_usage
 
 
     @contract()
@@ -715,7 +714,8 @@ class Collector(service.Service):
 
 
     @contract()
-    def log_host_overload(self, db, overload_threshold, hostname, previous_overload,
+    def log_host_overload(self, db, overload_threshold, hostname,
+                          previous_overload,
                           host_total_mhz, host_utilization_mhz):
         """ Log to the DB whether the host is overloaded.
 
@@ -745,7 +745,6 @@ class Collector(service.Service):
         if previous_overload != -1 and previous_overload != overload_int \
                 or previous_overload == -1:
             db.insert_host_overload(hostname, overload)
-            if log.isEnabledFor(logging.DEBUG):
-                log.debug('Overload state logged: %s', str(overload))
+            LOG.debug('Overload state logged: %s', str(overload))
 
         return overload_int
