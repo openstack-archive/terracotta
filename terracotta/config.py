@@ -30,6 +30,42 @@ launch_opt = cfg.ListOpt(
          'global-manager, local-manager, and local-collector.'
 )
 
+default_opts = [
+    cfg.StrOpt('log_directory', default='/var/log/neat',
+               help='The directory, where log files will '
+                    'be created by the Neat services'),
+    cfg.StrOpt('log_level', default='3',
+               help='The level of emitted log messages:'
+                    '0 -- no logging'
+                    '1 -- errors and warnings'
+                    '2 -- errors, warnings, and information messages'
+                    '3 -- errors, warnings, information messages, and debug messages'),
+    # instead of the bottle library,Maybe these two options below should be deprecated
+    cfg.StrOpt('global_manager_host', default='controller',
+               help='The name of the host running the global manager'),
+    cfg.StrOpt('global_manager_port', default='60080',
+               help='The port of the REST web service exposed by the global manager'),
+    # this function doesn't be used any more,so it's deprecated also.
+    # If not,db_cleaner_interval should be placed in a individual section.
+    cfg.StrOpt('db_cleaner_interval', default='7200',
+               help='The time interval between subsequent invocations of the database'),
+    # the two options below are used for local_manager and collector
+    cfg.StrOpt('local_data_directory', default='/var/lib/neat',
+               help='The directory used by the data collector to store the data on the'
+                    'resource usage by the VMs running on the host'),
+    cfg.StrOpt('host_cpu_usable_by_vms', default='1.0',
+               help='The threshold on the overall (all cores) utilization of the physical '
+                    'CPU of a host that can be allocated to VMs.'),
+    # the option below is used for global_manager and collector
+    cfg.StrOpt('data_collector_data_length', default='100',
+               help='The number of the latest data values stored locally '
+                    'by the data collector and passed to the underload / '
+                    'overload detection and VM placement algorithms'),
+    # the option below is used for global_manager and local_manager
+    cfg.StrOpt('network_migration_bandwidth', default='10',
+               help='The network bandwidth in MB/s available for VM migration')
+]
+
 api_opts = [
     cfg.StrOpt('host', default='0.0.0.0', help='Terracotta API server host'),
     cfg.IntOpt('port', default=9090, help='Terracotta API server port')
@@ -59,47 +95,110 @@ use_debugger = cfg.BoolOpt(
 )
 
 global_manager_opts = [
-    cfg.StrOpt('engine', default='default',
-               help='Mistral engine plugin'),
-    cfg.StrOpt('host', default='0.0.0.0',
-               help='Name of the engine node. This can be an opaque '
-                    'identifier. It is not necessarily a hostname, '
-                    'FQDN, or IP address.'),
-    cfg.StrOpt('topic', default='engine',
-               help='The message topic that the engine listens on.'),
-    cfg.StrOpt('version', default='1.0',
-               help='The version of the engine.')
+    # If use keystone V3,the options below should be rewrote probably
+    cfg.StrOpt('vm_instance_directory', default='/var/lib/nova/instances',
+               help='The directory, where the VM instance data are stored'),
+    cfg.StrOpt('os_admin_tenant_name', default='tenantname',
+               help='The admin tenant name for authentication '
+                    'with Nova using Keystone'),
+    cfg.StrOpt('os_admin_user', default='username',
+               help='The admin user name for authentication '
+                    'with Nova using Keystone'),
+    cfg.StrOpt('os_admin_password', default='adminpassword',
+               help='The admin password for authentication '
+                    'with Nova using Keystone'),
+    cfg.StrOpt('os_auth_url', default='http://controller:5000/v2.0/',
+               help='The OpenStack authentication URL'),
+    cfg.StrOpt('compute_hosts', default='compute1, compute2, compute3',
+               help='A coma-separated list of compute host names'),
+    cfg.StrOpt('block_migration', default='True',
+               help='Whether to use block migration (includes disk migration)'),
+    # the two options below never be used in the project.So we should
+    # fix this bug.
+    cfg.StrOpt('compute_user', default='neat',
+               help='The user name for connecting to the compute hosts '
+                    'to switch them into the sleep mode'),
+    cfg.StrOpt('compute_password', default='neatpassword',
+               help='The password of the user account used for connecting '
+                    'to the compute hosts to switch them into the sleep mode'),
+    cfg.StrOpt('sleep_command', default='pm-suspend',
+               help='A shell command used to switch a host into the sleep mode, the'
+                    'compute_user must have permissions to execute this command'),
+    cfg.StrOpt('ether_wake_interface', default='eth0',
+               help='The network interface to send a magic packet from '
+                    'using ether-wake'),
+    cfg.StrOpt('algorithm_vm_placement_factory',
+               default='neat.globals.vm_placement.bin_packing.best_fit_decreasing_factory',
+               help='The fully qualified name of a Python factory function that returns a'
+                    'function implementing a VM placement algorithm'),
+    cfg.StrOpt('algorithm_vm_placement_parameters',
+               default='{"cpu_threshold": 0.8, "ram_threshold": 0.95, "last_n_vm_cpu": 2}',
+               help='A JSON encoded parameters, which will be parsed and passed to the'
+                    'specified VM placement algorithm factory')
 ]
 
 local_manager_opts = [
-    cfg.StrOpt('host', default='0.0.0.0',
-               help='Name of the executor node. This can be an opaque '
-                    'identifier. It is not necessarily a hostname, '
-                    'FQDN, or IP address.'),
-    cfg.StrOpt('topic', default='executor',
-               help='The message topic that the executor listens on.'),
-    cfg.StrOpt('version', default='1.0',
-               help='The version of the executor.')
+    cfg.StrOpt('local_manager_interval', default='300',
+               help='The time interval between subsequent invocations '
+                    'of the local manager in seconds'),
+    cfg.StrOpt('algorithm_underload_detection_factory',
+               default='neat.locals.underload.trivial.last_n_average_threshold_factory',
+               help='The fully qualified name of a Python factory function that returns a'
+                    'function implementing an underload detection algorithm'),
+    cfg.StrOpt('algorithm_underload_detection_parameters',
+               default='{"threshold": 0.5, "n": 2}',
+               help='A JSON encoded parameters, which will be parsed and passed to the'
+                    'specified underload detection algorithm factory'),
+    cfg.StrOpt('algorithm_overload_detection_factory',
+               default='neat.locals.overload.mhod.core.mhod_factory',
+               help='The fully qualified name of a Python factory function that returns a'
+                    'function implementing an overload detection algorithm'),
+    cfg.StrOpt('algorithm_overload_detection_parameters',
+               default='{"state_config": [0.8], '
+                       '"otf": 0.1, '
+                       '"history_size": 500, '
+                       '"window_sizes": [30, 40, 50, 60, 70, 80, 90, 100], '
+                       '"bruteforce_step": 0.5, '
+                       '"learning_steps": 10}',
+               help='A JSON encoded parameters, which will be parsed and passed to the'
+                    'specified overload detection algorithm factory'),
+    cfg.StrOpt('algorithm_vm_selection_factory',
+               default='neat.locals.vm_selection.algorithms.minimum_migration_time_max_cpu_factory',
+               help='The fully qualified name of a Python factory function that returns a'
+                    'function implementing a VM selection algorithm'),
+    cfg.StrOpt('algorithm_vm_selection_parameters',
+               default='{"last_n": 2}',
+               help='A JSON encoded parameters, which will be parsed and passed to the'
+                    'specified VM selection algorithm factory')
 ]
 
 collector_opts = [
-    cfg.StrOpt('host', default='0.0.0.0',
-               help='Name of the executor node. This can be an opaque '
-                    'identifier. It is not necessarily a hostname, '
-                    'FQDN, or IP address.'),
-    cfg.StrOpt('topic', default='executor',
-               help='The message topic that the executor listens on.'),
-    cfg.StrOpt('version', default='1.0',
-               help='The version of the executor.')
+    cfg.StrOpt('data_collector_interval', default='300',
+               help='The time interval between subsequent invocations '
+                    'of the data collector in seconds'),
+    cfg.StrOpt('host_cpu_overload_threshold', default='0.8',
+               help='The threshold on the overall (all cores) utilization '
+                    'of the physical CPU of a host, above which the host '
+                    'is considered to be overloaded.'
+                    'This is used for logging host overloads into the database.')
+]
+
+database_opts = [
+    cfg.StrOpt('sql_connection', default='mysql://neat:neatpassword@controller/neat',
+               help='The host name and credentials for connecting '
+                    'to the MySQL database specified in the format '
+                    'supported by SQLAlchemy')
 ]
 
 CONF = cfg.CONF
 
 CONF.register_opts(pecan_opts, group='pecan')
+CONF.register_opts(default_opts, group='default')
 CONF.register_opts(api_opts, group='api')
 CONF.register_opts(global_manager_opts, group='global_manager')
 CONF.register_opts(local_manager_opts, group='local_manager')
 CONF.register_opts(collector_opts, group='collector')
+CONF.register_opts(database_opts, group='database')
 
 CONF.register_cli_opt(use_debugger)
 CONF.register_cli_opt(launch_opt)
