@@ -1,4 +1,3 @@
-# Copyright 2012 Anton Beloglazov
 # Copyright 2015 - Huawei Technologies Co. Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,21 +24,21 @@ from terracotta import version
 
 launch_opt = cfg.ListOpt(
     'server',
-    default=['all'],
-    help='Specifies which mistral server to start by the launch script. '
+    default=['global-manager', 'local-manager', 'local-collector'],
+    help='Specifies which terracotta server to start by the launch script. '
          'Valid options are all or any combination of '
-         'api, engine, and executor.'
+         'global-manager, local-manager, and local-collector.'
 )
 
 api_opts = [
-    cfg.StrOpt('host', default='0.0.0.0', help='Mistral API server host'),
-    cfg.IntOpt('port', default=8989, help='Mistral API server port')
+    cfg.StrOpt('host', default='0.0.0.0', help='Terracotta API server host'),
+    cfg.IntOpt('port', default=9090, help='Terracotta API server port')
 ]
 
 pecan_opts = [
-    cfg.StrOpt('root', default='mistral.api.controllers.root.RootController',
+    cfg.StrOpt('root', default='terracotta.api.controllers.root.RootController',
                help='Pecan root controller'),
-    cfg.ListOpt('modules', default=["mistral.api"],
+    cfg.ListOpt('modules', default=["terracotta.api"],
                 help='A list of modules where pecan will search for '
                      'applications.'),
     cfg.BoolOpt('debug', default=False,

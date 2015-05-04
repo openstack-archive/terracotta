@@ -34,7 +34,9 @@ if os.path.exists(os.path.join(POSSIBLE_TOPDIR, 'terracotta', '__init__.py')):
 from oslo_config import cfg
 from oslo_log import log as logging
 import oslo_messaging as messaging
+from wsgiref import simple_server
 
+from terracotta.api import app
 from terracotta import config
 from terracotta import rpc
 from terracotta.locals import collector
@@ -44,6 +46,22 @@ from terracotta import version
 
 
 LOG = logging.getLogger(__name__)
+
+
+def launch_api(transport):
+    host = cfg.CONF.api.host
+    port = cfg.CONF.api.port
+
+    server = simple_server.make_server(
+        host,
+        port,
+        app.setup_app()
+    )
+
+    LOG.info("Terracotta API is serving on http://%s:%s (PID=%s)" %
+             (host, port, os.getpid()))
+
+    server.serve_forever()
 
 
 def launch_lm(transport):

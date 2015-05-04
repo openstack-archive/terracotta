@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-#
-# Copyright 2013 - Mirantis, Inc.
+# Copyright 2015 Huawei Technologies Co. Ltd
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -14,13 +12,11 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from oslo.config import cfg
+from oslo_config import cfg
 import pecan
 
-from mistral.api import access_control
-from mistral import context as ctx
-from mistral.db.v2 import api as db_api_v2
-from mistral.services import periodic
+from terracotta.api import access_control
+from terracotta import context as ctx
 
 
 def get_pecan_config():
@@ -44,10 +40,6 @@ def setup_app(config=None):
         config = get_pecan_config()
 
     app_conf = dict(config.app)
-
-    db_api_v2.setup_db()
-
-    periodic.setup()
 
     app = pecan.make_app(
         app_conf.pop('root'),

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-#
-# Copyright 2013 - Mirantis, Inc.
+# Copyright 2015 Huawei Technologies Co. Ltd
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -18,9 +16,10 @@ import pecan
 from wsme import types as wtypes
 import wsmeext.pecan as wsme_pecan
 
-from mistral.api.controllers import resource
-from mistral.api.controllers.v2 import root as v2_root
-from mistral.openstack.common import log as logging
+from oslo_log import log as logging
+
+from terracotta.api.controllers import resource
+from terracotta.api.controllers.v1 import root as v1_root
 
 LOG = logging.getLogger(__name__)
 
@@ -46,23 +45,23 @@ class APIVersion(resource.Resource):
             status='CURRENT',
             link=resource.Link(
                 target_name='v1',
-                href='http://example.com:9777/v1'
+                href='http://example.com:9999/v1'
             )
         )
 
 
 class RootController(object):
-    v2 = v2_root.Controller()
+    v1 = v1_root.Controller()
 
     @wsme_pecan.wsexpose([APIVersion])
     def index(self):
         LOG.debug("Fetching API versions.")
 
-        host_url_v2 = '%s/%s' % (pecan.request.host_url, 'v2')
-        api_v2 = APIVersion(
-            id='v2.0',
+        host_url_v1 = '%s/%s' % (pecan.request.host_url, 'v1')
+        api_v1 = APIVersion(
+            id='v1.0',
             status='CURRENT',
-            link=resource.Link(href=host_url_v2, target='v2')
+            link=resource.Link(href=host_url_v1, target='v1')
         )
 
-        return [api_v2]
+        return [api_v1]

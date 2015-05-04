@@ -1,3 +1,4 @@
+# Copyright 2013 - Mirantis, Inc.
 # Copyright 2015 - StackStorm, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,29 +14,24 @@
 #    limitations under the License.
 
 import pecan
-from pecan import rest
+from wsme import types as wtypes
+import wsmeext.pecan as wsme_pecan
 
-from mistral import exceptions as exc
-from mistral.openstack.common import log as logging
-
-
-LOG = logging.getLogger(__name__)
+from terracotta.api.controllers import resource
 
 
-class SpecValidationController(rest.RestController):
+class RootResource(resource.Resource):
+    """Root resource for API version 2.
 
-    def __init__(self, parser):
-        super(SpecValidationController, self).__init__()
-        self._parse_func = parser
+    It references all other resources belonging to the API.
+    """
 
-    @pecan.expose('json')
-    def post(self):
-        """Validate a spec."""
-        definition = pecan.request.text
+    uri = wtypes.text
 
-        try:
-            self._parse_func(definition)
-        except exc.DSLParsingException as e:
-            return {'valid': False, 'error': e.message}
 
-        return {'valid': True}
+class Controller(object):
+    """API root controller for version 1."""
+
+    @wsme_pecan.wsexpose(RootResource)
+    def index(self):
+        return RootResource(uri='%s/%s' % (pecan.request.host_url, 'v1'))

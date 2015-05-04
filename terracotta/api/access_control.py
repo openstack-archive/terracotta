@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
-#
 # Copyright 2013 - Mirantis, Inc.
+# Copyright 2015 Huawei Technologies Co. Ltd
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -17,7 +16,7 @@
 """Access Control API server."""
 
 from keystonemiddleware import auth_token
-from oslo.config import cfg
+from oslo_config import cfg
 
 
 _ENFORCER = None

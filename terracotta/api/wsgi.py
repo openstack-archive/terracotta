@@ -1,4 +1,4 @@
-# Copyright 2015 - StackStorm, Inc.
+# Copyright 2015 Huawei Technologies Co. Ltd
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -12,8 +12,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from mistral.api import app
-from mistral import config
+from terracotta.api import app
+from terracotta import config
 
 config.parse_args()
 application = app.setup_app()
