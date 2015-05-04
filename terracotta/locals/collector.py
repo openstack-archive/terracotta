@@ -91,7 +91,6 @@ invoked, the component performs the following steps:
 """
 
 from collections import deque
-from contracts import contract
 import libvirt
 import os
 import time
@@ -100,8 +99,6 @@ from oslo_config import cfg
 from oslo_log import log as logging
 
 from terracotta import common
-from terracotta.contracts_extra import *
-from terracotta.contracts_primitive import *
 from terracotta.openstack.common import periodic_task
 from terracotta.openstack.common import threadgroup
 from terracotta.utils import db_utils
@@ -133,16 +130,8 @@ class Collector(periodic_task.PeriodicTasks):
             context=None
         )
 
-    @contract
     def init_state(self):
-        """ Initialize a dict for storing the state of the data collector.
-
-        :param config: A config dictionary.
-         :type config: dict(str: *)
-
-        :return: A dict containing the initial state of the data collector.
-         :rtype: dict
-        """
+        """ Initialize a dict for storing the state of the data collector."""
         vir_connection = libvirt.openReadOnly(None)
         if vir_connection is None:
             message = 'Failed to open a connection to the hypervisor'
@@ -302,28 +291,20 @@ class Collector(periodic_task.PeriodicTasks):
         self.state = state
 
 
-    @contract
     def get_previous_vms(self, path):
         """ Get a list of VM UUIDs from the path.
 
         :param path: A path to read VM UUIDs from.
-         :type path: str
-
         :return: The list of VM UUIDs from the path.
-         :rtype: list(str)
         """
         return os.listdir(path)
 
 
-    @contract()
     def get_current_vms(self, vir_connection):
         """ Get a dict of VM UUIDs to states from libvirt.
 
         :param vir_connection: A libvirt connection object.
-         :type vir_connection: virConnect
-
         :return: The dict of VM UUIDs to states from libvirt.
-         :rtype: dict(str: int)
         """
         vm_uuids = {}
         for vm_id in vir_connection.listDomainsID():
@@ -335,74 +316,50 @@ class Collector(periodic_task.PeriodicTasks):
         return vm_uuids
 
 
-    @contract
     def get_added_vms(self, previous_vms, current_vms):
         """ Get a list of newly added VM UUIDs.
 
         :param previous_vms: A list of VMs at the previous time frame.
-         :type previous_vms: list(str)
-
         :param current_vms: A list of VM at the current time frame.
-         :type current_vms: list(str)
-
         :return: A list of VM UUIDs added since the last time frame.
-         :rtype: list(str)
         """
         return self.substract_lists(current_vms, previous_vms)
 
 
-    @contract
     def get_removed_vms(self, previous_vms, current_vms):
         """ Get a list of VM UUIDs removed since the last time frame.
 
         :param previous_vms: A list of VMs at the previous time frame.
-         :type previous_vms: list(str)
-
         :param current_vms: A list of VM at the current time frame.
-         :type current_vms: list(str)
-
         :return: A list of VM UUIDs removed since the last time frame.
-         :rtype: list(str)
         """
         return substract_lists(previous_vms, current_vms)
 
 
-    @contract
     def substract_lists(self, list1, list2):
         """ Return the elements of list1 that are not in list2.
 
         :param list1: The first list.
-         :type list1: list
-
         :param list2: The second list.
-         :type list2: list
-
         :return: The list of element of list 1 that are not in list2.
-         :rtype: list
         """
         return list(set(list1).difference(list2))
 
 
-    @contract
     def cleanup_local_vm_data(self, path, vms):
         """ Delete the local data related to the removed VMs.
 
         :param path: A path to remove VM data from.
-         :type path: str
-
         :param vms: A list of removed VM UUIDs.
-         :type vms: list(str)
         """
         for vm in vms:
             os.remove(os.path.join(path, vm))
 
 
-    @contract
     def cleanup_all_local_data(self, path):
         """ Delete all the local data about VMs.
 
         :param path: A path to the local data directory.
-         :type path: str
         """
         vm_path = common.build_local_vm_path(path)
         cleanup_local_vm_data(vm_path, os.listdir(vm_path))
@@ -411,21 +368,13 @@ class Collector(periodic_task.PeriodicTasks):
             os.remove(host_path)
 
 
-    @contract
     def fetch_remote_data(self, db, data_length, uuids):
         """ Fetch VM data from the central DB.
 
         :param db: The database object.
-         :type db: Database
-
         :param data_length: The length of data to fetch.
-         :type data_length: int
-
         :param uuids: A list of VM UUIDs to fetch data for.
-         :type uuids: list(str)
-
         :return: A dictionary of VM UUIDs and the corresponding data.
-         :rtype: dict(str : list(int))
         """
         result = dict()
         for uuid in uuids:
@@ -433,18 +382,12 @@ class Collector(periodic_task.PeriodicTasks):
         return result
 
 
-    @contract
     def write_vm_data_locally(self, path, data, data_length):
         """ Write a set of CPU MHz values for a set of VMs.
 
         :param path: A path to write the data to.
-         :type path: str
-
         :param data: A map of VM UUIDs onto the corresponing CPU MHz history.
-         :type data: dict(str : list(int))
-
         :param data_length: The maximum allowed length of the data.
-         :type data_length: int
         """
         for uuid, values in data.items():
             with open(os.path.join(path, uuid), 'w') as f:
@@ -453,18 +396,12 @@ class Collector(periodic_task.PeriodicTasks):
                                        for x in values[-data_length:]]) + '\n')
 
 
-    @contract
     def append_vm_data_locally(self, path, data, data_length):
         """ Write a CPU MHz value for each out of a set of VMs.
 
         :param path: A path to write the data to.
-         :type path: str
-
         :param data: A map of VM UUIDs onto the corresponing CPU MHz values.
-         :type data: dict(str : int)
-
         :param data_length: The maximum allowed length of the data.
-         :type data_length: int
         """
         for uuid, value in data.items():
             vm_path = os.path.join(path, uuid)
@@ -480,31 +417,21 @@ class Collector(periodic_task.PeriodicTasks):
                     f.write('\n'.join([str(x) for x in values]) + '\n')
 
 
-    @contract
     def append_vm_data_remotely(self, db, data):
         """ Submit CPU MHz values to the central database.
 
         :param db: The database object.
-         :type db: Database
-
         :param data: A map of VM UUIDs onto the corresponing CPU MHz values.
-         :type data: dict(str : int)
         """
         db.insert_vm_cpu_mhz(data)
 
 
-    @contract
     def append_host_data_locally(self, path, cpu_mhz, data_length):
         """ Write a CPU MHz value for the host.
 
         :param path: A path to write the data to.
-         :type path: str
-
         :param cpu_mhz: A CPU MHz value.
-         :type cpu_mhz: int,>=0
-
         :param data_length: The maximum allowed length of the data.
-         :type data_length: int
         """
         if not os.access(path, os.F_OK):
             with open(path, 'w') as f:
@@ -518,54 +445,30 @@ class Collector(periodic_task.PeriodicTasks):
                 f.write('\n'.join([str(x) for x in values]) + '\n')
 
 
-    @contract
     def append_host_data_remotely(self, db, hostname, host_cpu_mhz):
         """ Submit a host CPU MHz value to the central database.
 
         :param db: The database object.
-         :type db: Database
-
         :param hostname: The host name.
-         :type hostname: str
-
         :param host_cpu_mhz: An average host CPU utilization in MHz.
-         :type host_cpu_mhz: int,>=0
         """
         db.insert_host_cpu_mhz(hostname, host_cpu_mhz)
 
 
-    @contract
     def get_cpu_mhz(self, vir_connection, physical_core_mhz, previous_cpu_time,
                     previous_time, current_time, current_vms,
                     previous_cpu_mhz, added_vm_data):
         """ Get the average CPU utilization in MHz for a set of VMs.
 
         :param vir_connection: A libvirt connection object.
-         :type vir_connection: virConnect
-
         :param physical_core_mhz: The core frequency of the physical CPU in MHz.
-         :type physical_core_mhz: int
-
         :param previous_cpu_time: A dict of previous CPU times for the VMs.
-         :type previous_cpu_time: dict(str : int)
-
         :param previous_time: The previous timestamp.
-         :type previous_time: float
-
         :param current_time: The previous timestamp.
-         :type current_time: float
-
         :param current_vms: A list of VM UUIDs.
-         :type current_vms: list(str)
-
         :param previous_cpu_mhz: A dict of VM UUIDs and previous CPU MHz.
-         :type previous_cpu_mhz: dict(str : int)
-
         :param added_vm_data: A dict of VM UUIDs and the corresponding data.
-         :type added_vm_data: dict(str : list(int))
-
         :return: The updated CPU times and average CPU utilization in MHz.
-         :rtype: tuple(dict(str : int), dict(str : int))
         """
         previous_vms = previous_cpu_time.keys()
         added_vms = self.get_added_vms(previous_vms, current_vms)
@@ -608,18 +511,12 @@ class Collector(periodic_task.PeriodicTasks):
         return previous_cpu_time, cpu_mhz
 
 
-    @contract
     def get_cpu_time(self, vir_connection, uuid):
         """ Get the CPU time of a VM specified by the UUID using libvirt.
 
         :param vir_connection: A libvirt connection object.
-         :type vir_connection: virConnect
-
         :param uuid: The UUID of a VM.
-         :type uuid: str[36]
-
         :return: The CPU time of the VM.
-         :rtype: int,>=0
         """
         try:
             domain = vir_connection.lookupByUUIDString(uuid)
@@ -628,49 +525,29 @@ class Collector(periodic_task.PeriodicTasks):
             return 0
 
 
-    @contract
     def calculate_cpu_mhz(self, cpu_mhz, previous_time, current_time,
                           previous_cpu_time, current_cpu_time):
         """ Calculate the average CPU utilization in MHz for a period of time.
 
         :param cpu_mhz: The frequency of a core of the physical CPU in MHz.
-         :type cpu_mhz: int
-
         :param previous_time: The previous time.
-         :type previous_time: float
-
         :param current_time: The current time.
-         :type current_time: float
-
         :param previous_cpu_time: The previous CPU time of the domain.
-         :type previous_cpu_time: int
-
         :param current_cpu_time: The current CPU time of the domain.
-         :type current_cpu_time: int
-
         :return: The average CPU utilization in MHz.
-         :rtype: int,>=0
         """
         return int(cpu_mhz * float(current_cpu_time - previous_cpu_time) / \
                    ((current_time - previous_time) * 1000000000))
 
 
-    @contract
     def get_host_cpu_mhz(self, cpu_mhz, previous_cpu_time_total,
                          previous_cpu_time_busy):
         """ Get the average CPU utilization in MHz for a set of VMs.
 
         :param cpu_mhz: The total frequency of the physical CPU in MHz.
-         :type cpu_mhz: int
-
         :param previous_cpu_time_total: The previous total CPU time.
-         :type previous_cpu_time_total: float
-
         :param previous_cpu_time_busy: The previous busy CPU time.
-         :type previous_cpu_time_busy: float
-
         :return: The current total and busy CPU time, and CPU utilization in MHz.
-         :rtype: tuple(float, float, int)
         """
         cpu_time_total, cpu_time_busy = get_host_cpu_time()
         cpu_usage = int(cpu_mhz * (cpu_time_busy - previous_cpu_time_busy) / \
@@ -687,63 +564,43 @@ class Collector(periodic_task.PeriodicTasks):
         return cpu_time_total, cpu_time_busy, cpu_usage
 
 
-    @contract()
     def get_host_cpu_time(self):
         """ Get the total and busy CPU time of the host.
 
         :return: A tuple of the total and busy CPU time.
-         :rtype: tuple(float, float)
         """
         with open('/proc/stat', 'r') as f:
             values = [float(x) for x in f.readline().split()[1:8]]
             return sum(values), sum(values[0:3])
 
 
-    @contract()
     def get_host_characteristics(self, vir_connection):
         """ Get the total CPU MHz and RAM of the host.
 
         :param vir_connection: A libvirt connection object.
-         :type vir_connection: virConnect
-
         :return: A tuple of the total CPU MHz and RAM of the host.
-         :rtype: tuple(int, long)
         """
         info = vir_connection.getInfo()
         return info[2] * info[3], info[1]
 
 
-    @contract()
     def log_host_overload(self, db, overload_threshold, hostname,
                           previous_overload,
                           host_total_mhz, host_utilization_mhz):
         """ Log to the DB whether the host is overloaded.
 
         :param db: The database object.
-         :type db: Database
-
         :param overload_threshold: The host overload threshold.
-         :type overload_threshold: float
-
         :param hostname: The host name.
-         :type hostname: str
-
         :param previous_overload: Whether the host has been overloaded.
-         :type previous_overload: int
-
         :param host_total_mhz: The total frequency of the CPU in MHz.
-         :type host_total_mhz: int
-
         :param host_utilization_mhz: The total CPU utilization in MHz.
-         :type host_utilization_mhz: int
-
         :return: Whether the host is overloaded.
-         :rtype: int
         """
         overload = overload_threshold * host_total_mhz < host_utilization_mhz
         overload_int = int(overload)
         if previous_overload != -1 and previous_overload != overload_int \
-                or previous_overload == -1:
+            or previous_overload == -1:
             db.insert_host_overload(hostname, overload)
             LOG.debug('Overload state logged: %s', str(overload))
 

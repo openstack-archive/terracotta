@@ -78,15 +78,12 @@ else:
 import subprocess
 import time
 
-from contracts import contract
 import novaclient
 from novaclient.v2 import client
 from oslo_config import cfg
 from oslo_log import log as logging
 
 from terracotta import common
-from terracotta.contracts_primitive import *
-from terracotta.contracts_extra import *
 from terracotta.utils import db_utils
 
 
@@ -94,15 +91,11 @@ LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
 
 
-@contract
 def host_mac(host):
     """ Get mac address of a host.
 
     :param host: A host name.
-     :type host: str
-
     :return: The mac address of the host.
-     :rtype: str
     """
     mac = subprocess.Popen(
         ("ping -c 1 {0} > /dev/null;" +
@@ -116,31 +109,21 @@ def host_mac(host):
     return mac
 
 
-@contract
 def flavors_ram(nova):
     """ Get a dict of flavor IDs to the RAM limits.
 
     :param nova: A Nova client.
-     :type nova: *
-
     :return: A dict of flavor IDs to the RAM limits.
-     :rtype: dict(str: int)
     """
     return dict((str(fl.id), fl.ram) for fl in nova.flavors.list())
 
 
-@contract
 def vms_ram_limit(nova, vms):
     """ Get the RAM limit from the flavors of the VMs.
 
     :param nova: A Nova client.
-     :type nova: *
-
     :param vms: A list of VM UUIDs.
-     :type vms: list(str)
-
     :return: A dict of VM UUIDs to the RAM limits.
-     :rtype: dict(str: int)
     """
     flavors_to_ram = flavors_ram(nova)
     vms_ram = {}
@@ -153,18 +136,12 @@ def vms_ram_limit(nova, vms):
     return vms_ram
 
 
-@contract
 def host_used_ram(nova, host):
     """ Get the used RAM of the host using the Nova API.
 
     :param nova: A Nova client.
-     :type nova: *
-
     :param host: A host name.
-     :type host: str
-
     :return: The used RAM of the host.
-     :rtype: int
     """
     data = nova.hosts.get(host)
     if len(data) > 2 and data[2].memory_mb != 0:
@@ -172,18 +149,12 @@ def host_used_ram(nova, host):
     return data[1].memory_mb
 
 
-@contract
 def vms_by_hosts(nova, hosts):
     """ Get a map of host names to VMs using the Nova API.
 
     :param nova: A Nova client.
-     :type nova: *
-
     :param hosts: A list of host names.
-     :type hosts: list(str)
-
     :return: A dict of host names to lists of VM UUIDs.
-     :rtype: dict(str: list(str))
     """
     result = dict((host, []) for host in hosts)
     for vm in nova.servers.list():
@@ -191,55 +162,35 @@ def vms_by_hosts(nova, hosts):
     return result
 
 
-@contract
 def vms_by_host(nova, host):
     """ Get VMs from the specified host using the Nova API.
 
     :param nova: A Nova client.
-     :type nova: *
-
     :param host: A host name.
-     :type host: str
-
     :return: A list of VM UUIDs from the specified host.
-     :rtype: list(str)
     """
     return [str(vm.id) for vm in nova.servers.list()
             if (vm_hostname(vm) == host and str(
             getattr(vm, 'OS-EXT-STS:vm_state')) == 'active')]
 
 
-@contract
 def vm_hostname(vm):
     """ Get the name of the host where VM is running.
 
     :param vm: A Nova VM object.
-     :type vm: *
-
     :return: The hostname.
-     :rtype: str
     """
     return str(getattr(vm, 'OS-EXT-SRV-ATTR:host'))
 
 
-@contract
 def migrate_vms(db, nova, vm_instance_directory, placement, block_migration):
     """ Synchronously live migrate a set of VMs.
 
     :param db: The database object.
-     :type db: Database
-
     :param nova: A Nova client.
-     :type nova: *
-
     :param vm_instance_directory: The VM instance directory.
-     :type vm_instance_directory: str
-
     :param placement: A dict of VM UUIDs to host names.
-     :type placement: dict(str: str)
-
     :param block_migration: Whether to use block migration.
-     :type block_migration: bool
     """
     retry_placement = {}
     vms = placement.keys()
@@ -288,24 +239,14 @@ def migrate_vms(db, nova, vm_instance_directory, placement, block_migration):
                     retry_placement, block_migration)
 
 
-@contract
 def migrate_vm(nova, vm_instance_directory, vm, host, block_migration):
     """ Live migrate a VM.
 
     :param nova: A Nova client.
-     :type nova: *
-
     :param vm_instance_directory: The VM instance directory.
-     :type vm_instance_directory: str
-
     :param vm: The UUID of a VM to migrate.
-     :type vm: str
-
     :param host: The name of the destination host.
-     :type host: str
-
     :param block_migration: Whether to use block migration.
-     :type block_migration: bool
     """
     # To avoid problems with migration, need the following:
     subprocess.call('chown -R nova:nova ' + vm_instance_directory,
@@ -314,18 +255,12 @@ def migrate_vm(nova, vm_instance_directory, vm, host, block_migration):
     LOG.info('Started migration of VM %s to %s', vm, host)
 
 
-@contract
 def switch_hosts_off(db, sleep_command, hosts):
     """ Switch hosts to a low-power mode.
 
     :param db: The database object.
-     :type db: Database
-
     :param sleep_command: A Shell command to switch off a host.
-     :type sleep_command: str
-
     :param hosts: A list of hosts to switch off.
-     :type hosts: list(str)
     """
     if sleep_command:
         for host in hosts:
@@ -378,7 +313,6 @@ class GlobalManager(object):
             dict((x, 1) for x in hosts))
 
 
-    @contract
     def execute_underload(self, host):
         """ Process an underloaded host: migrate all VMs from the host.
 
@@ -393,10 +327,7 @@ class GlobalManager(object):
         4. Switch off the host at the end of the VM migration.
 
         :param host: A host name.
-         :type host: str
-
         :return: The updated state dictionary.
-         :rtype: dict(str: *)
         """
         LOG.info('Started processing an underload request')
         underloaded_host = host

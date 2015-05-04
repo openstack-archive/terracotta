@@ -100,19 +100,15 @@ local manager performs the following steps:
 7. Schedule the next execution after local_manager_interval seconds.
 """
 
-from contracts import contract
 from hashlib import sha1
 import libvirt
 import os
-import requests
 import time
 
 from oslo_config import cfg
 from oslo_log import log as logging
 
 from terracotta import common
-from terracotta.contracts_primitive import *
-from terracotta.contracts_extra import *
 from terracotta.openstack.common import periodic_task
 from terracotta.openstack.common import threadgroup
 from terracotta.utils import db_utils
@@ -292,15 +288,11 @@ class LocalManager(periodic_task.PeriodicTasks):
         self.state = state
 
 
-    @contract
     def get_local_vm_data(self, path):
         """ Read the data about VMs from the local storage.
 
         :param path: A path to read VM UUIDs from.
-         :type path: str
-
         :return: A map of VM UUIDs onto the corresponing CPU MHz values.
-         :rtype: dict(str : list(int))
         """
         result = {}
         for uuid in os.listdir(path):
@@ -309,15 +301,12 @@ class LocalManager(periodic_task.PeriodicTasks):
         return result
 
 
-    @contract
     def get_local_host_data(self, path):
         """ Read the data about the host from the local storage.
 
         :param path: A path to read the host data from.
-         :type path: str
-
         :return: A history of the host CPU usage in MHz.
-         :rtype: list(int)
+
         """
         if not os.access(path, os.F_OK):
             return []
@@ -326,18 +315,13 @@ class LocalManager(periodic_task.PeriodicTasks):
         return result
 
 
-    @contract
     def cleanup_vm_data(self, vm_data, uuids):
         """ Remove records for the VMs that are not in the list of UUIDs.
 
         :param vm_data: A map of VM UUIDs to some data.
-         :type vm_data: dict(str: *)
-
         :param uuids: A list of VM UUIDs.
-         :type uuids: list(str)
-
         :return: The cleaned up map of VM UUIDs to data.
-         :rtype: dict(str: *)
+
         """
         for uuid, _ in vm_data.items():
             if uuid not in uuids:
@@ -345,18 +329,12 @@ class LocalManager(periodic_task.PeriodicTasks):
         return vm_data
 
 
-    @contract
     def get_ram(self, vir_connection, vm_ids):
         """ Get the maximum RAM for a set of VM UUIDs.
 
         :param vir_connection: A libvirt connection object.
-         :type vir_connection: virConnect
-
         :param vm_ids: A list of VM UUIDs.
-         :type vm_ids: list(str)
-
         :return: The maximum RAM for the VM UUIDs.
-         :rtype: dict(str : long)
         """
         vms_ram = {}
         for uuid in vm_ids:
@@ -367,18 +345,12 @@ class LocalManager(periodic_task.PeriodicTasks):
         return vms_ram
 
 
-    @contract
     def get_max_ram(self, vir_connection, uuid):
         """ Get the max RAM allocated to a VM UUID using libvirt.
 
         :param vir_connection: A libvirt connection object.
-         :type vir_connection: virConnect
-
         :param uuid: The UUID of a VM.
-         :type uuid: str[36]
-
         :return: The maximum RAM of the VM in MB.
-         :rtype: long|None
         """
         try:
             domain = vir_connection.lookupByUUIDString(uuid)
@@ -387,22 +359,14 @@ class LocalManager(periodic_task.PeriodicTasks):
             return None
 
 
-    @contract
     def vm_mhz_to_percentage(self, vm_mhz_history, host_mhz_history,
                              physical_cpu_mhz):
         """ Convert VM CPU utilization to the host's CPU utilization.
 
         :param vm_mhz_history: A list of CPU utilization histories of VMs in MHz.
-         :type vm_mhz_history: list(list(int))
-
         :param host_mhz_history: A history if the CPU usage by the host in MHz.
-         :type host_mhz_history: list(int)
-
         :param physical_cpu_mhz: The total frequency of the physical CPU in MHz.
-         :type physical_cpu_mhz: int,>0
-
         :return: The history of the host's CPU utilization in percentages.
-         :rtype: list(float)
         """
         max_len = max(len(x) for x in vm_mhz_history)
         if len(host_mhz_history) > max_len:
