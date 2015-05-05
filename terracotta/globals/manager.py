@@ -396,7 +396,7 @@ class GlobalManager(object):
                 return self.state
             vms_cpu[vm] = self.state['db'].select_cpu_mhz_for_vm(
                 vm,
-                int(CONF.data_collector_data_length))
+                CONF.data_collector_data_length)
         vms_ram = vms_ram_limit(self.state['nova'], vms_to_migrate)
 
         # Remove VMs that are not in vms_ram
@@ -413,10 +413,10 @@ class GlobalManager(object):
             if not vm in vms_ram:
                 del vms_cpu[vm]
 
-        time_step = int(CONF.data_collector_interval)
+        time_step = CONF.data_collector_interval
         migration_time = common.calculate_migration_time(
             vms_ram,
-            float(CONF.network_migration_bandwidth))
+            CONF.network_migration_bandwidth)
 
         if 'vm_placement' not in self.state:
             vm_placement_params = common.parse_parameters(
@@ -462,7 +462,7 @@ class GlobalManager(object):
                         self.state['nova'],
                         CONF.vm_instance_directory,
                         placement,
-                        bool(CONF.block_migration))
+                        CONF.block_migration)
             LOG.info('Completed underload VM migrations')
 
         if hosts_to_deactivate:
@@ -548,7 +548,7 @@ class GlobalManager(object):
                 return self.state
             vms_cpu[vm] = self.state['db'].select_cpu_mhz_for_vm(
                 vm,
-                int(CONF.data_collector_data_length))
+                CONF.data_collector_data_length)
         vms_ram = vms_ram_limit(self.state['nova'], vms_to_migrate)
 
         # Remove VMs that are not in vms_ram
@@ -565,10 +565,10 @@ class GlobalManager(object):
             if not vm in vms_ram:
                 del vms_cpu[vm]
 
-        time_step = int(CONF.data_collector_interval)
+        time_step = CONF.data_collector_interval
         migration_time = common.calculate_migration_time(
             vms_ram,
-            float(CONF.network_migration_bandwidth))
+            CONF.network_migration_bandwidth)
 
         if 'vm_placement' not in state:
             vm_placement_params = common.parse_parameters(
@@ -610,7 +610,7 @@ class GlobalManager(object):
                         self.state['nova'],
                         CONF.vm_instance_directory,
                         placement,
-                        bool(CONF.block_migration))
+                        CONF.block_migration)
             LOG.info('Completed overload VM migrations')
         LOG.info('Completed processing an overload request')
         return state

@@ -1,0 +1,148 @@
+[default]
+# The name of the host running the global manager
+global_manager_host = controller
+
+# The port of the REST web service exposed by the global manager
+global_manager_port = 60080
+
+# The time interval between subsequent invocations of the database
+# cleaner in seconds
+db_cleaner_interval = 7200
+
+# The directory used by the data collector to store the data on the
+# resource usage by the VMs running on the host
+local_data_directory = /var/lib/terracotta
+
+# The threshold on the overall (all cores) utilization of the physical
+# CPU of a host that can be allocated to VMs.
+host_cpu_usable_by_vms = 1.0
+
+# The number of the latest data values stored locally by the data
+# collector and passed to the underload / overload detection and VM
+# placement algorithms
+data_collector_data_length = 100
+
+# The network bandwidth in MB/s available for VM migration
+network_migration_bandwidth = 10
+
+[api]
+# Terracotta API server host
+host = 0.0.0.0
+
+# Terracotta API server port
+port = 9090
+
+[pecan]
+# Pecan root controller
+root = terracotta.api.controllers.root.RootController
+
+# A list of modules where pecan will search for applications.
+modules = terracotta.api
+
+# Enables the ability to display tracebacks in the
+# browser and interactively debug during development.
+debug = False
+
+# Enables user authentication in pecan.
+auth_enable = True
+
+[global_manager]
+# The directory, where the VM instance data are stored
+vm_instance_directory = /var/lib/nova/instances
+
+# The admin tenant name for authentication with Nova using Keystone
+os_admin_tenant_name = admin
+
+# The admin user name for authentication with Nova using Keystone
+os_admin_user = admin
+
+# The admin password for authentication with Nova using Keystone
+os_admin_password = adminpassword
+
+# The OpenStack authentication URL
+os_auth_url = http://controller:5000/v2.0/
+
+# A coma-separated list of compute host names
+compute_hosts = compute1, compute2, compute3, compute4
+
+# Whether to use block migration (includes disk migration)
+block_migration = True
+
+# The user name for connecting to the compute hosts to switch them
+# into the sleep mode
+compute_user = terracotta
+
+# The password of the user account used for connecting to the compute
+# hosts to switch them into the sleep mode
+compute_password = terracottapassword
+
+# A shell command used to switch a host into the sleep mode, the
+# compute_user must have permissions to execute this command
+sleep_command = pm-suspend
+
+# The network interface to send a magic packet from using ether-wake
+ether_wake_interface = eth0
+
+# The fully qualified name of a Python factory function that returns a
+# function implementing a VM placement algorithm
+algorithm_vm_placement_factory = terracotta.globals.vm_placement.bin_packing.best_fit_decreasing_factory
+
+# A JSON encoded parameters, which will be parsed and passed to the
+# specified VM placement algorithm factory
+algorithm_vm_placement_parameters = {"cpu_threshold": 0.8, "ram_threshold": 0.95, "last_n_vm_cpu": 2}
+
+[local_manager]
+# The time interval between subsequent invocations of the local
+# manager in seconds
+local_manager_interval = 300
+
+# The fully qualified name of a Python factory function that returns a
+# function implementing an underload detection algorithm
+#algorithm_underload_detection_factory = terracotta.locals.underload.trivial.threshold_factory
+algorithm_underload_detection_factory = terracotta.locals.underload.trivial.last_n_average_threshold_factory
+
+# A JSON encoded parameters, which will be parsed and passed to the
+# specified underload detection algorithm factory
+#algorithm_underload_detection_parameters = {"threshold": 0.3}
+algorithm_underload_detection_parameters = {"threshold": 0.5, "n": 2}
+
+# The fully qualified name of a Python factory function that returns a
+# function implementing an overload detection algorithm
+#algorithm_overload_detection_factory = terracotta.locals.overload.trivial.threshold_factory
+algorithm_overload_detection_factory = terracotta.locals.overload.mhod.core.mhod_factory
+#algorithm_overload_detection_factory = terracotta.locals.overload.trivial.last_n_average_threshold_factory
+#algorithm_overload_detection_factory = terracotta.locals.overload.statistics.loess_factory
+#algorithm_overload_detection_factory = terracotta.locals.overload.otf.otf_factory
+
+# A JSON encoded parameters, which will be parsed and passed to the
+# specified overload detection algorithm factory
+#algorithm_overload_detection_parameters = {"threshold": 0.9}
+algorithm_overload_detection_parameters = {"state_config": [0.8], "otf": 0.1, "history_size": 500, "window_sizes": [30, 40, 50, 60, 70, 80, 90, 100], "bruteforce_step": 0.5, "learning_steps": 10}
+#algorithm_overload_detection_parameters = {"threshold": 0.95, "n": 2}
+#algorithm_overload_detection_parameters = {"threshold": 0.8, "param": 1.0, "length": 30}
+#algorithm_overload_detection_parameters = {"otf": 0.2, "threshold": 0.8, "limit": 10}
+
+# The fully qualified name of a Python factory function that returns a
+# function implementing a VM selection algorithm
+#algorithm_vm_selection_factory = terracotta.locals.vm_selection.algorithms.minimum_migration_time_factory
+algorithm_vm_selection_factory = terracotta.locals.vm_selection.algorithms.minimum_migration_time_max_cpu_factory
+
+# A JSON encoded parameters, which will be parsed and passed to the
+# specified VM selection algorithm factory
+#algorithm_vm_selection_parameters = {}
+algorithm_vm_selection_parameters = {"last_n": 2}
+
+[collector]
+# The time interval between subsequent invocations of the data
+# collector in seconds
+data_collector_interval = 300
+
+# The threshold on the overall (all cores) utilization of the physical
+# CPU of a host, above which the host is considered to be overloaded.
+# This is used for logging host overloads into the database.
+host_cpu_overload_threshold = 0.8
+
+[database]
+# The host name and credentials for connecting to the MySQL database
+# specified in the format supported by SQLAlchemy
+sql_connection = mysql://terracotta:terracottapassword@controller/terracotta
