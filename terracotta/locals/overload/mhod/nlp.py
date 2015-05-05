@@ -15,31 +15,16 @@
 """ Functions for defing the NLP problem of the MHOD algorithm.
 """
 
-from contracts import contract
-from neat.contracts_primitive import *
-from neat.contracts_extra import *
-
 import operator
 
-import logging
-log = logging.getLogger(__name__)
 
-
-@contract
 def build_objective(ls, state_vector, p):
     """ Creates an objective function, which is a sum of the L functions.
 
     :param ls: A list of L functions.
-     :type ls: list(function)
-
     :param state-vector: A state vector.
-     :type state-vector: list(int)
-
     :param p: A matrix of transition probabilities.
-     :type p: list(list(number))
-
     :return: An objective function.
-     :rtype: function
     """
     def objective(*m):
         return sum(l(state_vector, p, list(m)) for l in ls)
@@ -52,28 +37,13 @@ def build_constraint(otf, migration_time, ls, state_vector,
     """ Creates an optimization constraint from the L functions.
 
     :param otf: The OTF parameter.
-     :type otf: float
-
     :param migration_time: The VM migration time in time steps.
-     :type migration_time: float,>=0
-
     :param ls: A list of L functions.
-     :type ls: list(function)
-
     :param state-vector: A state vector.
-     :type state-vector: list(int)
-
     :param p: A matrix of transition probabilities.
-     :type p: list(list(number))
-
     :param time_in_states: The total time in all the states in time steps.
-     :type time_in_states: number,>=0
-
     :param time_in_state_n: The total time in the state N in time steps.
-     :type time_in_state_n: number,>=0
-
     :return: The created constraint.
-     :rtype: tuple(function, function, number)
     """
     def constraint(*m):
         m_list = list(m)

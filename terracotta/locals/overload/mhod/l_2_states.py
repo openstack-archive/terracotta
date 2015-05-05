@@ -1,4 +1,5 @@
 # Copyright 2012 Anton Beloglazov
+# Copyright 2015 Huawei Technologies Co., Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,29 +16,14 @@
 """ L functions for the 2 state configuration of the MHOD algorithm.
 """
 
-from contracts import contract
-from neat.contracts_primitive import *
-from neat.contracts_extra import *
 
-import logging
-log = logging.getLogger(__name__)
-
-
-@contract
 def l0(p_initial, p_matrix, m):
     """ Compute the L0 function.
 
     :param p_initial: The initial state distribution.
-     :type p_initial: list(number)
-
     :param p_matrix: A matrix of transition probabilities.
-     :type p_matrix: list(list(number))
-
     :param m: The m values.
-     :type m: list(number)
-
     :return: The value of the L0 function.
-     :rtype: number
     """
     p0 = p_initial[0]
     p1 = p_initial[1]
@@ -53,21 +39,13 @@ def l0(p_initial, p_matrix, m):
              p10 - 1))
 
 
-@contract
 def l1(p_initial, p_matrix, m):
     """ Compute the L1 function.
 
     :param p_initial: The initial state distribution.
-     :type p_initial: list(number)
-
     :param p_matrix: A matrix of transition probabilities.
-     :type p_matrix: list(list(number))
-
     :param m: The m values.
-     :type m: list(number)
-
     :return: The value of the L1 function.
-     :rtype: number
     """
     p0 = p_initial[0]
     p1 = p_initial[1]

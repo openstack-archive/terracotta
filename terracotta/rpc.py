@@ -12,21 +12,17 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from oslo.config import cfg
-from oslo import messaging
+from oslo_config import cfg
+from oslo_log import log as logging
 from oslo_messaging.rpc import client
 
-from mistral import context as auth_ctx
-from mistral.engine import base
-from mistral import exceptions as exc
-from mistral.openstack.common import log as logging
-from mistral.workflow import utils as wf_utils
+from terracotta import context as auth_ctx
+from terracotta import exceptions as exc
 
 LOG = logging.getLogger(__name__)
 
 
 _TRANSPORT = None
-
 _ENGINE_CLIENT = None
 _EXECUTOR_CLIENT = None
 

@@ -15,29 +15,19 @@
 """ OTF threshold based algorithms.
 """
 
-from contracts import contract
-from neat.contracts_primitive import *
-from neat.contracts_extra import *
-
-import logging
-log = logging.getLogger(__name__)
+from oslo_log import log as logging
 
 
-@contract
+LOG = logging.getLogger(__name__)
+
+
 def otf_factory(time_step, migration_time, params):
     """ Creates the OTF algorithm with limiting and migration time.
 
     :param time_step: The length of the simulation time step in seconds.
-     :type time_step: int,>=0
-
     :param migration_time: The VM migration time in time seconds.
-     :type migration_time: float,>=0
-
     :param params: A dictionary containing the algorithm's parameters.
-     :type params: dict(str: *)
-
     :return: A function implementing the OTF algorithm.
-     :rtype: function
     """
     migration_time_normalized = float(migration_time) / time_step
     def otf_wrapper(utilization, state=None):
@@ -54,48 +44,33 @@ def otf_factory(time_step, migration_time, params):
     return otf_wrapper
 
 
-@contract
 def otf(otf, threshold, limit, migration_time, utilization, state):
     """ The OTF threshold algorithm with limiting and migration time.
 
     :param otf: The threshold on the OTF value.
-     :type otf: float,>=0
-
     :param threshold: The utilization overload threshold.
-     :type threshold: float,>=0
-
     :param limit: The minimum number of values in the utilization history.
-     :type limit: int,>=0
-
     :param migration_time: The VM migration time in time steps.
-     :type migration_time: float,>=0
-
     :param utilization: The history of the host's CPU utilization.
-     :type utilization: list(float)
-
     :param state: The state dictionary.
-     :type state: dict(str: *)
-
     :return: The decision of the algorithm and updated state.
-     :rtype: tuple(bool, dict(*: *))
     """
     state['total'] += 1
     overload = (utilization[-1] >= threshold)
     if overload:
         state['overload'] += 1
 
-    if log.isEnabledFor(logging.DEBUG):
-        log.debug('OTF overload:' + str(overload))
-        log.debug('OTF overload steps:' + str(state['overload']))
-        log.debug('OTF total steps:' + str(state['total']))
-        log.debug('OTF:' + str(float(state['overload']) / state['total']))
-        log.debug('OTF migration time:' + str(migration_time))
-        log.debug('OTF + migration time:' +
-                  str((migration_time + state['overload']) / \
-                          (migration_time + state['total'])))
-        log.debug('OTF decision:' +
-                  str(overload and (migration_time + state['overload']) / \
-                          (migration_time + state['total']) >= otf))
+    LOG.debug('OTF overload:' + str(overload))
+    LOG.debug('OTF overload steps:' + str(state['overload']))
+    LOG.debug('OTF total steps:' + str(state['total']))
+    LOG.debug('OTF:' + str(float(state['overload']) / state['total']))
+    LOG.debug('OTF migration time:' + str(migration_time))
+    LOG.debug('OTF + migration time:' +
+              str((migration_time + state['overload']) / \
+                      (migration_time + state['total'])))
+    LOG.debug('OTF decision:' +
+              str(overload and (migration_time + state['overload']) / \
+                      (migration_time + state['total']) >= otf))
 
     if not overload or len(utilization) < limit:
         decision = False
