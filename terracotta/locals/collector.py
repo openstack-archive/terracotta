@@ -141,7 +141,7 @@ class Collector(periodic_task.PeriodicTasks):
         hostname = vir_connection.getHostname()
         host_cpu_mhz, host_ram = self.get_host_characteristics(vir_connection)
         physical_cpus = common.physical_cpu_count(vir_connection)
-        host_cpu_usable_by_vms = float(CONF.host_cpu_usable_by_vms)
+        host_cpu_usable_by_vms = CONF.host_cpu_usable_by_vms
 
         db = db_utils.init_db()
         db.update_host(hostname,
@@ -158,7 +158,7 @@ class Collector(periodic_task.PeriodicTasks):
                 'vir_connection': vir_connection,
                 'hostname': hostname,
                 'host_cpu_overload_threshold':
-                    float(CONF.host_cpu_overload_threshold) * \
+                    CONF.host_cpu_overload_threshold * \
                     host_cpu_usable_by_vms,
                 'physical_cpus': physical_cpus,
                 'physical_cpu_mhz': host_cpu_mhz,
@@ -201,7 +201,7 @@ class Collector(periodic_task.PeriodicTasks):
 
         vm_path = common.build_local_vm_path(CONF.local_data_directory)
         host_path = common.build_local_host_path(CONF.local_data_directory)
-        data_length = int(CONF.data_collector_data_length)
+        data_length = CONF.data_collector_data_length
         vms_previous = self.get_previous_vms(vm_path)
         vms_current = self.get_current_vms(state['vir_connection'])
 

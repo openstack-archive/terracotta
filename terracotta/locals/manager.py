@@ -147,7 +147,7 @@ class LocalManager(periodic_task.PeriodicTasks):
 
         physical_cpu_mhz_total = int(
             common.physical_cpu_mhz_total(vir_connection) *
-            float(CONF.host_cpu_usable_by_vms))
+            CONF.host_cpu_usable_by_vms)
         return {'previous_time': 0.,
                 'vir_connection': vir_connection,
                 'db': db_utils.init_db(),
@@ -218,9 +218,9 @@ class LocalManager(periodic_task.PeriodicTasks):
             LOG.info('Skipped an iteration')
             return
 
-        time_step = int(CONF.data_collector_interval)
+        time_step = CONF.data_collector_interval
         migration_time = common.calculate_migration_time(
-            vm_ram, float(CONF.network_migration_bandwidth))
+            vm_ram, CONF.network_migration_bandwidth)
 
         if 'underload_detection' not in state:
             underload_detection_params = common.parse_parameters(

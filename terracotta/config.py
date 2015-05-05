@@ -37,7 +37,7 @@ default_opts = [
                help='The port of the REST web service exposed by the global manager'),
     cfg.IntOpt('db_cleaner_interval', default=7200,
                help='The time interval between subsequent invocations of the database'),
-    cfg.StrOpt('local_data_directory', default='/var/lib/neat',
+    cfg.StrOpt('local_data_directory', default='/var/lib/terracotta',
                help='The directory used by the data collector to store the data on the'
                     'resource usage by the VMs running on the host'),
     cfg.FloatOpt('host_cpu_usable_by_vms', default=1.0,
@@ -47,8 +47,8 @@ default_opts = [
                help='The number of the latest data values stored locally '
                     'by the data collector and passed to the underload / '
                     'overload detection and VM placement algorithms'),
-    cfg.IntOpt('network_migration_bandwidth', default=10,
-               help='The network bandwidth in MB/s available for VM migration')
+    cfg.FloatOpt('network_migration_bandwidth', default=10,
+                 help='The network bandwidth in MB/s available for VM migration')
 ]
 
 api_opts = [
@@ -97,10 +97,10 @@ global_manager_opts = [
                 help='A coma-separated list of compute host names'),
     cfg.BoolOpt('block_migration', default=True,
                 help='Whether to use block migration (includes disk migration)'),
-    cfg.StrOpt('compute_user', default='neat',
+    cfg.StrOpt('compute_user', default='terracotta',
                help='The user name for connecting to the compute hosts '
                     'to switch them into the sleep mode'),
-    cfg.StrOpt('compute_password', default='neatpassword',
+    cfg.StrOpt('compute_password', default='terracottapassword',
                help='The password of the user account used for connecting '
                     'to the compute hosts to switch them into the sleep mode'),
     cfg.StrOpt('sleep_command', default='pm-suspend',
@@ -110,7 +110,7 @@ global_manager_opts = [
                help='The network interface to send a magic packet from '
                     'using ether-wake'),
     cfg.StrOpt('algorithm_vm_placement_factory',
-               default='neat.globals.vm_placement.bin_packing.best_fit_decreasing_factory',
+               default='terracotta.globals.vm_placement.bin_packing.best_fit_decreasing_factory',
                help='The fully qualified name of a Python factory function that returns a'
                     'function implementing a VM placement algorithm'),
     cfg.DictOpt('algorithm_vm_placement_parameters',
@@ -124,7 +124,7 @@ local_manager_opts = [
                help='The time interval between subsequent invocations '
                     'of the local manager in seconds'),
     cfg.StrOpt('algorithm_underload_detection_factory',
-               default='neat.locals.underload.trivial.last_n_average_threshold_factory',
+               default='terracotta.locals.underload.trivial.last_n_average_threshold_factory',
                help='The fully qualified name of a Python factory function that returns a'
                     'function implementing an underload detection algorithm'),
     cfg.DictOpt('algorithm_underload_detection_parameters',
@@ -132,7 +132,7 @@ local_manager_opts = [
                 help='A JSON encoded parameters, which will be parsed and passed to the'
                      'specified underload detection algorithm factory'),
     cfg.StrOpt('algorithm_overload_detection_factory',
-               default='neat.locals.overload.mhod.core.mhod_factory',
+               default='terracotta.locals.overload.mhod.core.mhod_factory',
                help='The fully qualified name of a Python factory function that returns a'
                     'function implementing an overload detection algorithm'),
     cfg.DictOpt('algorithm_overload_detection_parameters',
@@ -145,7 +145,7 @@ local_manager_opts = [
                 help='A JSON encoded parameters, which will be parsed and passed to the'
                      'specified overload detection algorithm factory'),
     cfg.StrOpt('algorithm_vm_selection_factory',
-               default='neat.locals.vm_selection.algorithms.minimum_migration_time_max_cpu_factory',
+               default='terracotta.locals.vm_selection.algorithms.minimum_migration_time_max_cpu_factory',
                help='The fully qualified name of a Python factory function that returns a'
                     'function implementing a VM selection algorithm'),
     cfg.DictOpt('algorithm_vm_selection_parameters',
@@ -166,7 +166,7 @@ collector_opts = [
 ]
 
 database_opts = [
-    cfg.StrOpt('sql_connection', default='mysql://neat:neatpassword@controller/neat',
+    cfg.StrOpt('sql_connection', default='mysql://terracotta:terracottapassword@controller/terracotta',
                help='The host name and credentials for connecting '
                     'to the MySQL database specified in the format '
                     'supported by SQLAlchemy')
