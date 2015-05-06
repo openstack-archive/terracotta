@@ -23,6 +23,7 @@ from terracotta import db as database
 
 
 LOG = logging.getLogger(__name__)
+CONF = cfg.CONF
 
 
 def init_db():
@@ -31,7 +32,7 @@ def init_db():
     :param sql_connection: A database connection URL.
     :return: The initialized database.
     """
-    engine = create_engine(CONF.sql_connection)
+    engine = create_engine(CONF.database.sql_connection)
     metadata = MetaData()
     metadata.bind = engine
 
@@ -91,5 +92,5 @@ def init_db():
                            vm_resource_usage, vm_migrations, host_states,
                            host_overload)
 
-    LOG.debug('Initialized a DB connection to %s', CONF.sql_connection)
+    LOG.debug('Initialized a DB connection to %s', CONF.database.sql_connection)
     return db

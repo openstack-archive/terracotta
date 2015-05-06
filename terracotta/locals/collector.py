@@ -112,14 +112,14 @@ class Collector(periodic_task.PeriodicTasks):
     def __init__(self):
         super(Collector, self).__init__()
 
-        vm_path = common.build_local_vm_path(CONF.local_data_directory)
+        vm_path = common.build_local_vm_path(CONF.default.local_data_directory)
         if not os.access(vm_path, os.F_OK):
             os.makedirs(vm_path)
             LOG.info('Created a local VM data directory: %s', vm_path)
         else:
-            self.cleanup_all_local_data(CONF.local_data_directory)
+            self.cleanup_all_local_data(CONF.default.local_data_directory)
             LOG.info('Creaned up the local data directory: %s',
-                     CONF.local_data_directory)
+                     CONF.default.local_data_directory)
 
         self.state = self.init_state()
         self.tg = threadgroup.ThreadGroup()
@@ -141,7 +141,7 @@ class Collector(periodic_task.PeriodicTasks):
         hostname = vir_connection.getHostname()
         host_cpu_mhz, host_ram = self.get_host_characteristics(vir_connection)
         physical_cpus = common.physical_cpu_count(vir_connection)
-        host_cpu_usable_by_vms = CONF.host_cpu_usable_by_vms
+        host_cpu_usable_by_vms = CONF.default.host_cpu_usable_by_vms
 
         db = db_utils.init_db()
         db.update_host(hostname,
@@ -158,7 +158,7 @@ class Collector(periodic_task.PeriodicTasks):
                 'vir_connection': vir_connection,
                 'hostname': hostname,
                 'host_cpu_overload_threshold':
-                    CONF.host_cpu_overload_threshold * \
+                    CONF.collector.host_cpu_overload_threshold * \
                     host_cpu_usable_by_vms,
                 'physical_cpus': physical_cpus,
                 'physical_cpu_mhz': host_cpu_mhz,
@@ -199,9 +199,9 @@ class Collector(periodic_task.PeriodicTasks):
         LOG.info('Started an iteration')
         state = self.state
 
-        vm_path = common.build_local_vm_path(CONF.local_data_directory)
-        host_path = common.build_local_host_path(CONF.local_data_directory)
-        data_length = CONF.data_collector_data_length
+        vm_path = common.build_local_vm_path(CONF.default.local_data_directory)
+        host_path = common.build_local_host_path(CONF.default.local_data_directory)
+        data_length = CONF.default.data_collector_data_length
         vms_previous = self.get_previous_vms(vm_path)
         vms_current = self.get_current_vms(state['vir_connection'])
 

@@ -147,14 +147,14 @@ class LocalManager(periodic_task.PeriodicTasks):
 
         physical_cpu_mhz_total = int(
             common.physical_cpu_mhz_total(vir_connection) *
-            CONF.host_cpu_usable_by_vms)
+            CONF.default.host_cpu_usable_by_vms)
         return {'previous_time': 0.,
                 'vir_connection': vir_connection,
                 'db': db_utils.init_db(),
                 'physical_cpu_mhz_total': physical_cpu_mhz_total,
                 'hostname': vir_connection.getHostname(),
-                'hashed_username': sha1(CONF.os_admin_user).hexdigest(),
-                'hashed_password': sha1(CONF.os_admin_password).hexdigest()}
+                'hashed_username': sha1(CONF.default.os_admin_user).hexdigest(),
+                'hashed_password': sha1(CONF.default.os_admin_password).hexdigest()}
 
     @periodic_task.periodic_task
     def execute(self):
@@ -191,7 +191,7 @@ class LocalManager(periodic_task.PeriodicTasks):
         LOG.info('Started an iteration')
         state = self.state
 
-        vm_path = common.build_local_vm_path(CONF.local_data_directory)
+        vm_path = common.build_local_vm_path(CONF.default.local_data_directory)
         vm_cpu_mhz = self.get_local_vm_data(vm_path)
         vm_ram = self.get_ram(state['vir_connection'], vm_cpu_mhz.keys())
         vm_cpu_mhz = self.cleanup_vm_data(vm_cpu_mhz, vm_ram.keys())
@@ -200,7 +200,7 @@ class LocalManager(periodic_task.PeriodicTasks):
             LOG.info('Skipped an iteration')
             return
 
-        host_path = common.build_local_host_path(CONF.local_data_directory)
+        host_path = common.build_local_host_path(CONF.default.local_data_directory)
         host_cpu_mhz = self.get_local_host_data(host_path)
 
         host_cpu_utilization = self.vm_mhz_to_percentage(
@@ -218,15 +218,15 @@ class LocalManager(periodic_task.PeriodicTasks):
             LOG.info('Skipped an iteration')
             return
 
-        time_step = CONF.data_collector_interval
+        time_step = CONF.default.data_collector_interval
         migration_time = common.calculate_migration_time(
-            vm_ram, CONF.network_migration_bandwidth)
+            vm_ram, CONF.default.network_migration_bandwidth)
 
         if 'underload_detection' not in state:
             underload_detection_params = common.parse_parameters(
-                CONF.algorithm_underload_detection_parameters)
+                CONF.local_manager.algorithm_underload_detection_parameters)
             underload_detection = common.call_function_by_name(
-                CONF.algorithm_underload_detection_factory,
+                CONF.local_manager.algorithm_underload_detection_factory,
                 [time_step,
                  migration_time,
                  underload_detection_params])
@@ -234,9 +234,9 @@ class LocalManager(periodic_task.PeriodicTasks):
             state['underload_detection_state'] = {}
 
             overload_detection_params = common.parse_parameters(
-                CONF.algorithm_overload_detection_parameters)
+                CONF.local_manager.algorithm_overload_detection_parameters)
             overload_detection = common.call_function_by_name(
-                CONF.algorithm_overload_detection_factory,
+                CONF.local_manager.algorithm_overload_detection_factory,
                 [time_step,
                  migration_time,
                  overload_detection_params])
@@ -244,9 +244,9 @@ class LocalManager(periodic_task.PeriodicTasks):
             state['overload_detection_state'] = {}
 
             vm_selection_params = common.parse_parameters(
-                CONF.algorithm_vm_selection_parameters)
+                CONF.local_manager.algorithm_vm_selection_parameters)
             vm_selection = common.call_function_by_name(
-                CONF.algorithm_vm_selection_factory,
+                CONF.local_manager.algorithm_vm_selection_factory,
                 [time_step,
                  migration_time,
                  vm_selection_params])

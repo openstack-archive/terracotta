@@ -37,6 +37,12 @@ default_opts = [
                help='The port of the REST web service exposed by the global manager'),
     cfg.IntOpt('db_cleaner_interval', default=7200,
                help='The time interval between subsequent invocations of the database'),
+    cfg.StrOpt('os_admin_user', default='user',
+               help='The admin user name for authentication '
+                    'with Nova using Keystone'),
+    cfg.StrOpt('os_admin_password', default='userpassword',
+               help='The admin password for authentication '
+                    'with Nova using Keystone'),
     cfg.StrOpt('local_data_directory', default='/var/lib/terracotta',
                help='The directory used by the data collector to store the data on the'
                     'resource usage by the VMs running on the host'),
@@ -48,7 +54,10 @@ default_opts = [
                     'by the data collector and passed to the underload / '
                     'overload detection and VM placement algorithms'),
     cfg.FloatOpt('network_migration_bandwidth', default=10,
-                 help='The network bandwidth in MB/s available for VM migration')
+                 help='The network bandwidth in MB/s available for VM migration'),
+    cfg.IntOpt('data_collector_interval', default=300,
+               help='The time interval between subsequent invocations '
+                    'of the data collector in seconds')
 ]
 
 api_opts = [
@@ -84,12 +93,6 @@ global_manager_opts = [
                help='The directory, where the VM instance data are stored'),
     cfg.StrOpt('os_admin_tenant_name', default='tenantname',
                help='The admin tenant name for authentication '
-                    'with Nova using Keystone'),
-    cfg.StrOpt('os_admin_user', default='username',
-               help='The admin user name for authentication '
-                    'with Nova using Keystone'),
-    cfg.StrOpt('os_admin_password', default='adminpassword',
-               help='The admin password for authentication '
                     'with Nova using Keystone'),
     cfg.StrOpt('os_auth_url', default='http://controller:5000/v2.0/',
                help='The OpenStack authentication URL'),
@@ -155,9 +158,6 @@ local_manager_opts = [
 ]
 
 collector_opts = [
-    cfg.IntOpt('data_collector_interval', default=300,
-               help='The time interval between subsequent invocations '
-                    'of the data collector in seconds'),
     cfg.FloatOpt('host_cpu_overload_threshold', default=0.8,
                  help='The threshold on the overall (all cores) utilization '
                       'of the physical CPU of a host, above which the host '
