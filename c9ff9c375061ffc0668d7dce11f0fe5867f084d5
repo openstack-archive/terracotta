@@ -1,0 +1,8 @@
+Verified+2: Jenkins
+Code-Review+2: Lingxian Kong <anlin.kong@gmail.com>
+Workflow+1: Lingxian Kong <anlin.kong@gmail.com>
+Submitted-by: Jenkins
+Submitted-at: Wed, 06 May 2015 09:41:42 +0000
+Reviewed-on: https://review.openstack.org/180415
+Project: stackforge/terracotta
+Branch: refs/heads/master
