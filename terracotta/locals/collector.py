@@ -1,4 +1,5 @@
 # Copyright 2012 Anton Beloglazov
+# Copyright 2015 Huawei Technologies Co., Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -211,9 +212,9 @@ class Collector(periodic_task.PeriodicTasks):
             LOG.debug('Added VMs: %s', str(vms_added))
             for i, vm in enumerate(vms_added):
                 if vms_current[vm] != libvirt.VIR_DOMAIN_RUNNING:
+                    LOG.debug('Added VM %s not in running state', vm)
                     del vms_added[i]
                     del vms_current[vm]
-                    LOG.debug('Added VM %s skipped as migrating in', vm)
 
             added_vm_data = self.fetch_remote_data(state['db'],
                                                    data_length,
@@ -362,7 +363,7 @@ class Collector(periodic_task.PeriodicTasks):
         :param path: A path to the local data directory.
         """
         vm_path = common.build_local_vm_path(path)
-        cleanup_local_vm_data(vm_path, os.listdir(vm_path))
+        self.cleanup_local_vm_data(vm_path, os.listdir(vm_path))
         host_path = common.build_local_host_path(path)
         if os.access(host_path, os.F_OK):
             os.remove(host_path)
@@ -549,7 +550,7 @@ class Collector(periodic_task.PeriodicTasks):
         :param previous_cpu_time_busy: The previous busy CPU time.
         :return: The current total and busy CPU time, and CPU utilization in MHz.
         """
-        cpu_time_total, cpu_time_busy = get_host_cpu_time()
+        cpu_time_total, cpu_time_busy = self.get_host_cpu_time()
         cpu_usage = int(cpu_mhz * (cpu_time_busy - previous_cpu_time_busy) / \
                         (cpu_time_total - previous_cpu_time_total))
         if cpu_usage < 0:
