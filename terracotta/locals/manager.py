@@ -224,9 +224,9 @@ class LocalManager(periodic_task.PeriodicTasks):
 
         if 'underload_detection' not in state:
             underload_detection_params = common.parse_parameters(
-                CONF.algorithm_underload_detection_parameters)
+                CONF.local_manager.algorithm_underload_detection_parameters)
             underload_detection = common.call_function_by_name(
-                CONF.algorithm_underload_detection_factory,
+                CONF.local_manager.algorithm_underload_detection_factory,
                 [time_step,
                  migration_time,
                  underload_detection_params])
@@ -234,9 +234,9 @@ class LocalManager(periodic_task.PeriodicTasks):
             state['underload_detection_state'] = {}
 
             overload_detection_params = common.parse_parameters(
-                CONF.algorithm_overload_detection_parameters)
+                CONF.local_manager.algorithm_overload_detection_parameters)
             overload_detection = common.call_function_by_name(
-                CONF.algorithm_overload_detection_factory,
+                CONF.local_manager.algorithm_overload_detection_factory,
                 [time_step,
                  migration_time,
                  overload_detection_params])
@@ -244,9 +244,9 @@ class LocalManager(periodic_task.PeriodicTasks):
             state['overload_detection_state'] = {}
 
             vm_selection_params = common.parse_parameters(
-                CONF.algorithm_vm_selection_parameters)
+                CONF.local_manager.algorithm_vm_selection_parameters)
             vm_selection = common.call_function_by_name(
-                CONF.algorithm_vm_selection_factory,
+                CONF.local_manager.algorithm_vm_selection_factory,
                 [time_step,
                  migration_time,
                  vm_selection_params])

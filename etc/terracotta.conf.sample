@@ -1,4 +1,4 @@
-[default]
+[DEFAULT]
 # The name of the host running the global manager
 global_manager_host = controller
 
@@ -8,6 +8,12 @@ global_manager_port = 60080
 # The time interval between subsequent invocations of the database
 # cleaner in seconds
 db_cleaner_interval = 7200
+
+# The admin user name for authentication with Nova using Keystone
+os_admin_user = user
+
+# The admin password for authentication with Nova using Keystone
+os_admin_password = userpassword
 
 # The directory used by the data collector to store the data on the
 # resource usage by the VMs running on the host
@@ -24,6 +30,10 @@ data_collector_data_length = 100
 
 # The network bandwidth in MB/s available for VM migration
 network_migration_bandwidth = 10
+
+# The time interval between subsequent invocations of the data
+# collector in seconds
+data_collector_interval = 300
 
 [api]
 # Terracotta API server host
@@ -51,13 +61,7 @@ auth_enable = True
 vm_instance_directory = /var/lib/nova/instances
 
 # The admin tenant name for authentication with Nova using Keystone
-os_admin_tenant_name = admin
-
-# The admin user name for authentication with Nova using Keystone
-os_admin_user = admin
-
-# The admin password for authentication with Nova using Keystone
-os_admin_password = adminpassword
+os_admin_tenant_name = tenantname
 
 # The OpenStack authentication URL
 os_auth_url = http://controller:5000/v2.0/
@@ -133,10 +137,6 @@ algorithm_vm_selection_factory = terracotta.locals.vm_selection.algorithms.minim
 algorithm_vm_selection_parameters = {"last_n": 2}
 
 [collector]
-# The time interval between subsequent invocations of the data
-# collector in seconds
-data_collector_interval = 300
-
 # The threshold on the overall (all cores) utilization of the physical
 # CPU of a host, above which the host is considered to be overloaded.
 # This is used for logging host overloads into the database.

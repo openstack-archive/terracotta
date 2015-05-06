@@ -159,7 +159,7 @@ class Collector(periodic_task.PeriodicTasks):
                 'vir_connection': vir_connection,
                 'hostname': hostname,
                 'host_cpu_overload_threshold':
-                    CONF.host_cpu_overload_threshold * \
+                    CONF.collector.host_cpu_overload_threshold * \
                     host_cpu_usable_by_vms,
                 'physical_cpus': physical_cpus,
                 'physical_cpu_mhz': host_cpu_mhz,

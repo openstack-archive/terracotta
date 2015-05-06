@@ -284,13 +284,13 @@ class GlobalManager(object):
                 'nova': client.Client(2,
                                       CONF.os_admin_user,
                                       CONF.os_admin_password,
-                                      CONF.os_admin_tenant_name,
-                                      CONF.os_auth_url,
+                                      CONF.global_manager.os_admin_tenant_name,
+                                      CONF.global_manager.os_auth_url,
                                       service_type="compute"),
                 'hashed_username': sha1(CONF.os_admin_user).hexdigest(),
                 'hashed_password': sha1(CONF.os_admin_password).hexdigest(),
                 'compute_hosts': common.parse_compute_hosts(
-                    CONF.compute_hosts),
+                    CONF.global_manager.compute_hosts),
                 'host_macs': {}}
 
     def switch_hosts_on(self, hosts):
@@ -302,7 +302,7 @@ class GlobalManager(object):
 
             command = '{0} -i {1} {2}'.format(
                 etherwake,
-                CONF.ether_wake_interface,
+                CONF.global_manager.ether_wake_interface,
                 self.state['host_macs'][host])
 
             LOG.debug('Calling: %s', command)
@@ -420,10 +420,10 @@ class GlobalManager(object):
 
         if 'vm_placement' not in self.state:
             vm_placement_params = common.parse_parameters(
-                CONF.algorithm_vm_placement_parameters)
+                CONF.global_manager.algorithm_vm_placement_parameters)
             vm_placement_state = None
             vm_placement = common.call_function_by_name(
-                CONF.algorithm_vm_placement_factory,
+                CONF.global_manager.algorithm_vm_placement_factory,
                 [time_step,
                  migration_time,
                  vm_placement_params])
@@ -460,14 +460,14 @@ class GlobalManager(object):
             LOG.info('Started underload VM migrations')
             migrate_vms(self.state['db'],
                         self.state['nova'],
-                        CONF.vm_instance_directory,
+                        CONF.global_manager.vm_instance_directory,
                         placement,
-                        CONF.block_migration)
+                        CONF.global_manager.block_migration)
             LOG.info('Completed underload VM migrations')
 
         if hosts_to_deactivate:
             switch_hosts_off(self.state['db'],
-                             CONF.sleep_command,
+                             CONF.global_manager.sleep_command,
                              hosts_to_deactivate)
 
         LOG.info('Completed processing an underload request')
@@ -572,10 +572,10 @@ class GlobalManager(object):
 
         if 'vm_placement' not in state:
             vm_placement_params = common.parse_parameters(
-                CONF.algorithm_vm_placement_parameters)
+                CONF.global_manager.algorithm_vm_placement_parameters)
             vm_placement_state = None
             vm_placement = common.call_function_by_name(
-                CONF.algorithm_vm_placement_factory,
+                CONF.global_manager.algorithm_vm_placement_factory,
                 [time_step,
                  migration_time,
                  vm_placement_params])
@@ -608,9 +608,9 @@ class GlobalManager(object):
             LOG.info('Started overload VM migrations')
             migrate_vms(self.state['db'],
                         self.state['nova'],
-                        CONF.vm_instance_directory,
+                        CONF.global_manager.vm_instance_directory,
                         placement,
-                        CONF.block_migration)
+                        CONF.global_manager.block_migration)
             LOG.info('Completed overload VM migrations')
         LOG.info('Completed processing an overload request')
         return state
