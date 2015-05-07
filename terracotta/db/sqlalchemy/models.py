@@ -48,21 +48,22 @@ class TerracottaBase(models.TimestampMixin,
 class Host(BASE, TerracottaBase):
     __tablename__ = 'hosts'
     id = Column(Integer, primary_key=True)
-    host_name = Column(String(255))
-    cpu_mhz = Column(String(255))
-    cpu_cores = Column(String(255))
-    cpu_vendor = Column(String(255))
+    host_name = Column(String(255), nullable=False)
+    cpu_mhz = Column(String(255), nullable=False)
+    cpu_cores = Column(String(255), nullable=False)
+    cpu_vendor = Column(String(255), nullable=True)
     ram = Column(Integer, nullable=False, default=0)
     disabled = Column(Boolean, default=False)
-    disabled_reason = Column(String(255))
+    disabled_reason = Column(String(255), nullable=True)
 
 
 class HostResourceUsage(BASE, TerracottaBase):
     __tablename__ = 'host_resource_usage'
     id = Column(Integer, primary_key=True)
-    host_id = Column(String(255))
-    cpu_mhz = Column(String(255))
-    
+    host_id = Column(String(255), nullable=False)
+    cpu_mhz = Column(String(255), nullable=False)
+    time_stamp = Column(DateTime)
+
     host = relationship(Host, backref="host_resource_usage",
                         foreign_keys=host_id,
                         primaryjoin='HostResourceUsage.host_id == Host.id')
@@ -76,9 +77,50 @@ class VM(BASE, TerracottaBase):
 class VmResourceUsage(BASE, TerracottaBase):
     __tablename__ = 'vm_resource_usage'
     id = Column(Integer, primary_key=True)
-    vm_id = Column(String(255))
+    vm_id = Column(String(255), nullable=False)
     cpu_mhz = Column(String(255))
-    
-    host = relationship(Host, backref="vm_resource_usage",
+    time_stamp = Column(DateTime)
+
+    host = relationship(VM, backref="vm_resource_usage",
                         foreign_keys=vm_id,
                         primaryjoin='VmResourceUsage.vm_id == VM.id')
+
+
+class VmMigration(BASE, TerracottaBase):
+    __tablename__ = 'vm_migrations'
+    id = Column(Integer, primary_key=True)
+    vm_id = Column(String(255), nullable=False)
+    host_id = Column(String(255), nullable=False)
+    time_stamp = Column(DateTime)
+
+    vm = relationship(VM, backref="vm_migrations",
+                      foreign_keys=vm_id,
+                      primaryjoin='vm_migrations.vm_id == VM.id')
+
+    host = relationship(Host, backref="vm_migrations",
+                        foreign_keys=host_id,
+                        primaryjoin='vm_migrations.host_id == Host.id')
+
+
+class HostState(BASE, TerracottaBase):
+    __tablename__ = 'host_states'
+    id = Column(Integer, primary_key=True)
+    state = Column(Integer, nullable=False)
+    host_id = Column(String(255), nullable=False)
+    time_stamp = Column(DateTime)
+
+    host = relationship(Host, backref="host_states",
+                        foreign_keys=host_id,
+                        primaryjoin='host_states.host_id == Host.id')
+
+
+class HostOverload(BASE, TerracottaBase):
+    __tablename__ = 'host_overload'
+    id = Column(Integer, primary_key=True)
+    host_id = Column(String(255), nullable=False)
+    time_stamp = Column(DateTime)
+    state = Column(Integer, nullable=False)
+
+    host = relationship(Host, backref="host_overload",
+                        foreign_keys=host_id,
+                        primaryjoin='host_overload.host_id == Host.id')
