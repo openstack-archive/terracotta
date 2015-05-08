@@ -95,6 +95,12 @@ use_debugger = cfg.BoolOpt(
 )
 
 global_manager_opts = [
+    cfg.StrOpt('host', default='0.0.0.0',
+               help='Name of the global_manager node. This can be an opaque '
+                    'identifier. It is not necessarily a hostname, '
+                    'FQDN, or IP address.'),
+    cfg.StrOpt('topic', default='global_manager',
+               help='The message topic that the global_manager listens on.'),
     cfg.StrOpt('vm_instance_directory', default='/var/lib/nova/instances',
                help='The directory, where the VM instance data are stored'),
     cfg.StrOpt('os_admin_tenant_name', default='tenantname',
@@ -135,6 +141,12 @@ global_manager_opts = [
 ]
 
 local_manager_opts = [
+    cfg.StrOpt('host', default='0.0.0.0',
+               help='Name of the local_manager node. This can be an opaque '
+                    'identifier. It is not necessarily a hostname, '
+                    'FQDN, or IP address.'),
+    cfg.StrOpt('topic', default='local_manager',
+               help='The message topic that the local_manager listens on.'),
     cfg.IntOpt('local_manager_interval', default=300,
                help='The time interval between subsequent invocations '
                     'of the local manager in seconds'),
@@ -183,7 +195,13 @@ collector_opts = [
                       'of the physical CPU of a host, above which the host '
                       'is considered to be overloaded.'
                       'This is used for logging host overloads into the'
-                      ' database.')
+                      ' database.'),
+    cfg.StrOpt('host', default='0.0.0.0',
+               help='Name of the collector node. This can be an opaque '
+                    'identifier. It is not necessarily a hostname, '
+                    'FQDN, or IP address.'),
+    cfg.StrOpt('topic', default='collector',
+               help='The message topic that the collector listens on.'),
 ]
 
 database_opts = [
@@ -209,6 +227,7 @@ CONF.register_cli_opt(launch_opt)
 
 
 def parse_args(args=None, usage=None, default_config_files=None):
+    logging.register_options(CONF)
     CONF(
         args=args,
         project='terracotta',

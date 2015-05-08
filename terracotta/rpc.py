@@ -12,11 +12,11 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+from oslo import messaging
 from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_messaging.rpc import client
 
-from terracotta import context as auth_ctx
 from terracotta import exceptions as exc
 
 
@@ -96,7 +96,7 @@ def wrap_messaging_exception(method):
     return decorator
 
 
-class EngineClient(base.Engine):
+class EngineClient():
     """RPC Engine client."""
 
     def __init__(self, transport):
@@ -121,7 +121,7 @@ class LocalManagerServer(object):
         self._executor = manager
 
 
-class ExecutorClient(base.Executor):
+class ExecutorClient():
     """RPC Executor client."""
 
     def __init__(self, transport):

@@ -45,6 +45,7 @@ from terracotta.globals import manager as global_mgr
 from terracotta import version
 
 
+CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -108,8 +109,8 @@ def launch_gm(transport):
 
 def launch_collector(transport):
     target = messaging.Target(
-        topic=cfg.CONF.local_collector.topic,
-        server=cfg.CONF.local_collector.host
+        topic=cfg.CONF.collector.topic,
+        server=cfg.CONF.collector.host
     )
 
     global_manager = collector.Collector()
@@ -119,8 +120,7 @@ def launch_collector(transport):
         transport,
         target,
         endpoints,
-        executor='eventlet',
-        serializer=ctx.RpcContextSerializer(ctx.JsonPayloadSerializer())
+        executor='eventlet'
     )
 
     server.start()
@@ -168,7 +168,7 @@ def main():
     try:
         config.parse_args()
         print_service_info()
-        logging.setup(cfg.CONF, 'Terracotta')
+        logging.setup(CONF, 'Terracotta')
         transport = rpc.get_transport()
 
         launch_any(transport, set(cfg.CONF.server))

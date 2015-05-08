@@ -57,6 +57,14 @@ debug = False
 auth_enable = True
 
 [global_manager]
+# The message topic that the global_manager listens on. (string value)
+#topic=global_manager
+
+# Name of the global_manager node. This can be an opaque identifier.
+# It is not necessarily a hostname, FQDN, or IP address.
+# (string value)
+#host=0.0.0.0
+
 # The directory, where the VM instance data are stored
 vm_instance_directory = /var/lib/nova/instances
 
@@ -96,6 +104,14 @@ algorithm_vm_placement_factory = terracotta.globals.vm_placement.bin_packing.bes
 algorithm_vm_placement_parameters = {"cpu_threshold": 0.8, "ram_threshold": 0.95, "last_n_vm_cpu": 2}
 
 [local_manager]
+# The message topic that the local_manager listens on. (string value)
+#topic=local_manager
+
+# Name of the local_manager node. This can be an opaque identifier.
+# It is not necessarily a hostname, FQDN, or IP address.
+# (string value)
+#host=0.0.0.0
+
 # The time interval between subsequent invocations of the local
 # manager in seconds
 local_manager_interval = 300
@@ -141,6 +157,14 @@ algorithm_vm_selection_parameters = {"last_n": 2}
 # CPU of a host, above which the host is considered to be overloaded.
 # This is used for logging host overloads into the database.
 host_cpu_overload_threshold = 0.8
+
+# The message topic that the collector listens on. (string value)
+#topic=collector
+
+# Name of the collector node. This can be an opaque identifier.
+# It is not necessarily a hostname, FQDN, or IP address.
+# (string value)
+#host=0.0.0.0
 
 [database]
 # The host name and credentials for connecting to the MySQL database
