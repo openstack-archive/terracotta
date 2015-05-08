@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 """
-SQLAlchemy models for cinder data.
+SQLAlchemy models for Terracotta data.
 """
 
 from oslo_config import cfg
