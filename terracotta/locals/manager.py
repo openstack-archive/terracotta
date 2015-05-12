@@ -110,7 +110,6 @@ from oslo_log import log as logging
 
 from terracotta import common
 from terracotta.openstack.common import periodic_task
-from terracotta.openstack.common import threadgroup
 from terracotta.utils import db_utils
 
 
@@ -122,13 +121,6 @@ class LocalManager(periodic_task.PeriodicTasks):
     def __init__(self):
         super(LocalManager, self).__init__()
         self.state = self.init_state()
-        self.tg = threadgroup.ThreadGroup()
-        self.tg.add_dynamic_timer(
-            self.run_periodic_tasks,
-            initial_delay=None,
-            periodic_interval_max=1,
-            context=None
-        )
 
     def init_state(self):
         """ Initialize a dict for storing the state of the local manager.
@@ -156,8 +148,8 @@ class LocalManager(periodic_task.PeriodicTasks):
                 'hashed_username': sha1(CONF.os_admin_user).hexdigest(),
                 'hashed_password': sha1(CONF.os_admin_password).hexdigest()}
 
-    @periodic_task.periodic_task
-    def execute(self):
+    @periodic_task.periodic_task(spacing=10, run_immediately=True)
+    def execute(self, ctx=None):
         """ Execute an iteration of the local manager.
 
         1. Read the data on resource usage by the VMs running on the host from

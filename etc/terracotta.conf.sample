@@ -1,4 +1,8 @@
 [DEFAULT]
+# Print debugging output (set logging level to DEBUG instead
+# of default WARNING level). (boolean value)
+#debug=True
+
 # The name of the host running the global manager
 global_manager_host = controller
 
@@ -35,26 +39,30 @@ network_migration_bandwidth = 10
 # collector in seconds
 data_collector_interval = 300
 
+[oslo_messaging_rabbit]
+# The RabbitMQ broker address where a single node is used.
+# (string value)
+#rabbit_host=localhost
+
+# The RabbitMQ broker port where a single node is used.
+# (integer value)
+#rabbit_port=5672
+
+# RabbitMQ HA cluster host:port pairs. (list value)
+#rabbit_hosts=$rabbit_host:$rabbit_port
+
+# The RabbitMQ userid. (string value)
+#rabbit_userid=guest
+
+# The RabbitMQ password. (string value)
+#rabbit_password=guest
+
 [api]
 # Terracotta API server host
 host = 0.0.0.0
 
 # Terracotta API server port
 port = 9090
-
-[pecan]
-# Pecan root controller
-root = terracotta.api.controllers.root.RootController
-
-# A list of modules where pecan will search for applications.
-modules = terracotta.api
-
-# Enables the ability to display tracebacks in the
-# browser and interactively debug during development.
-debug = False
-
-# Enables user authentication in pecan.
-auth_enable = True
 
 [global_manager]
 # The message topic that the global_manager listens on. (string value)
@@ -169,4 +177,18 @@ host_cpu_overload_threshold = 0.8
 [database]
 # The host name and credentials for connecting to the MySQL database
 # specified in the format supported by SQLAlchemy
-sql_connection = mysql://terracotta:terracottapassword@controller/terracotta
+sql_connection = mysql://terracotta:password@localhost:3306/terracotta
+
+[pecan]
+# Pecan root controller
+root = terracotta.api.controllers.root.RootController
+
+# A list of modules where pecan will search for applications.
+modules = terracotta.api
+
+# Enables the ability to display tracebacks in the
+# browser and interactively debug during development.
+debug = False
+
+# Enables user authentication in pecan.
+auth_enable = True

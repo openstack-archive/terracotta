@@ -42,6 +42,7 @@ from terracotta import rpc
 from terracotta.locals import collector
 from terracotta.locals import manager as local_mgr
 from terracotta.globals import manager as global_mgr
+from terracotta.openstack.common import threadgroup
 from terracotta import version
 
 
@@ -74,12 +75,19 @@ def launch_lm(transport):
     local_manager = local_mgr.LocalManager()
     endpoints = [rpc.LocalManagerServer(local_manager)]
 
+    tg = threadgroup.ThreadGroup()
+    tg.add_dynamic_timer(
+        local_manager.run_periodic_tasks,
+        initial_delay=None,
+        periodic_interval_max=None,
+        context=None
+    )
+
     server = messaging.get_rpc_server(
         transport,
         target,
         endpoints,
-        executor='eventlet',
-        serializer=ctx.RpcContextSerializer(ctx.JsonPayloadSerializer())
+        executor='eventlet'
     )
 
     server.start()
@@ -100,7 +108,6 @@ def launch_gm(transport):
         target,
         endpoints,
         executor='eventlet',
-        serializer=ctx.RpcContextSerializer(ctx.JsonPayloadSerializer())
     )
 
     server.start()
@@ -113,8 +120,16 @@ def launch_collector(transport):
         server=cfg.CONF.collector.host
     )
 
-    global_manager = collector.Collector()
-    endpoints = [rpc.GlobalManagerServer(global_manager)]
+    launch_collector = collector.Collector()
+    endpoints = [rpc.GlobalManagerServer(launch_collector)]
+
+    tg = threadgroup.ThreadGroup()
+    tg.add_dynamic_timer(
+        launch_collector.run_periodic_tasks,
+        initial_delay=None,
+        periodic_interval_max=None,
+        context=None
+    )
 
     server = messaging.get_rpc_server(
         transport,

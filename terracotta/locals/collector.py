@@ -101,7 +101,6 @@ from oslo_log import log as logging
 
 from terracotta import common
 from terracotta.openstack.common import periodic_task
-from terracotta.openstack.common import threadgroup
 from terracotta.utils import db_utils
 
 
@@ -123,13 +122,6 @@ class Collector(periodic_task.PeriodicTasks):
                      CONF.local_data_directory)
 
         self.state = self.init_state()
-        self.tg = threadgroup.ThreadGroup()
-        self.tg.add_dynamic_timer(
-            self.run_periodic_tasks,
-            initial_delay=None,
-            periodic_interval_max=1,
-            context=None
-        )
 
     def init_state(self):
         """ Initialize a dict for storing the state of the data collector."""
@@ -166,8 +158,8 @@ class Collector(periodic_task.PeriodicTasks):
                 'physical_core_mhz': host_cpu_mhz / physical_cpus,
                 'db': db}
 
-    @periodic_task.periodic_task
-    def execute(self):
+    @periodic_task.periodic_task(spacing=10, run_immediately=True)
+    def execute(self, ctx=None):
         """ Execute a data collection iteration.
 
         1. Read the names of the files from the <local_data_directory>/vm
