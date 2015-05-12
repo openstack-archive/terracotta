@@ -19,7 +19,7 @@ from sqlalchemy.sql import func
 from oslo_config import cfg
 from oslo_log import log as logging
 
-from terracotta import db as database
+from terracotta import db_temp as database
 
 
 LOG = logging.getLogger(__name__)
