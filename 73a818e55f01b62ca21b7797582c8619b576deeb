@@ -1,0 +1,10 @@
+Verified+2: Jenkins
+Code-Review+2: Lingxian Kong <anlin.kong@gmail.com>
+Workflow+1: Lingxian Kong <anlin.kong@gmail.com>
+Code-Review+1: venkatamahesh <venkatamaheshkotha@gmail.com>
+Code-Review+1: Clint Adams <clint@gcfm.net>
+Submitted-by: Jenkins
+Submitted-at: Tue, 24 Nov 2015 05:22:57 +0000
+Reviewed-on: https://review.openstack.org/236609
+Project: openstack/terracotta
+Branch: refs/heads/master
