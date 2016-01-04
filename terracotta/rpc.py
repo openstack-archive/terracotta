@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from oslo import messaging
 from oslo_config import cfg
 from oslo_log import log as logging
+import oslo_messaging as messaging
 from oslo_messaging.rpc import client
 
 from terracotta import exceptions as exc
