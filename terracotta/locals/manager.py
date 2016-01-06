@@ -113,7 +113,30 @@ from terracotta.openstack.common import periodic_task
 from terracotta.utils import db_utils
 
 
+local_manager_opts = [
+    cfg.FloatOpt('host_cpu_usable_by_vms',
+                 default=1.0,
+                 help='The threshold on the overall (all cores) '
+                      'utilization of the physical CPU of a host '
+                      'that can be allocated to VMs.'),
+    cfg.StrOpt('os_admin_user',
+               default='admin',
+               help='The admin user name for authentication '
+                    'with Nova using Keystone.'),
+    cfg.StrOpt('os_admin_password',
+               default='admin',
+               help='The admin user password for authentication '
+                    'with Nova using Keystone.'),
+    cfg.StrOpt('local_data_directory',
+               default='/var/lib/terracotta',
+               help='he directory used by the data collector to store '
+                    'the data on the resource usage by the VMs running '
+                    'on the host.'),
+]
+
+
 CONF = cfg.CONF
+CONF.register_opts(local_manager_opts)
 LOG = logging.getLogger(__name__)
 
 

@@ -12,9 +12,17 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import sys
 
 import eventlet
+import os
+from oslo_config import cfg
+from oslo_log import log as logging
+from wsgiref import simple_server
+import sys
+from terracotta.api import app
+from terracotta import config
+from terracotta import rpc
+from terracotta import version
 
 eventlet.monkey_patch(
     os=True,
@@ -23,22 +31,12 @@ eventlet.monkey_patch(
     thread=False if '--use-debugger' in sys.argv else True,
     time=True)
 
-import os
 
 POSSIBLE_TOPDIR = os.path.normpath(os.path.join(os.path.abspath(sys.argv[0]),
                                                 os.pardir,
                                                 os.pardir))
 if os.path.exists(os.path.join(POSSIBLE_TOPDIR, 'terracotta', '__init__.py')):
     sys.path.insert(0, POSSIBLE_TOPDIR)
-
-from oslo_config import cfg
-from oslo_log import log as logging
-from wsgiref import simple_server
-
-from terracotta.api import app
-from terracotta import config
-from terracotta import rpc
-from terracotta import version
 
 
 CONF = cfg.CONF

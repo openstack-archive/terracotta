@@ -12,9 +12,17 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import sys
 
 import eventlet
+from oslo_config import cfg
+from oslo_log import log as logging
+import oslo_messaging as messaging
+import sys
+from terracotta import config
+from terracotta import rpc
+from terracotta.locals import collector
+from terracotta.openstack.common import threadgroup
+from terracotta import version
 
 eventlet.monkey_patch(
     os=True,
@@ -30,16 +38,6 @@ POSSIBLE_TOPDIR = os.path.normpath(os.path.join(os.path.abspath(sys.argv[0]),
                                                 os.pardir))
 if os.path.exists(os.path.join(POSSIBLE_TOPDIR, 'terracotta', '__init__.py')):
     sys.path.insert(0, POSSIBLE_TOPDIR)
-
-from oslo_config import cfg
-from oslo_log import log as logging
-import oslo_messaging as messaging
-
-from terracotta import config
-from terracotta import rpc
-from terracotta.locals import collector
-from terracotta.openstack.common import threadgroup
-from terracotta import version
 
 
 CONF = cfg.CONF

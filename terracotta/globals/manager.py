@@ -69,12 +69,6 @@ the beginning of the global manager's execution.
 
 from hashlib import sha1
 import platform
-
-dist = platform.linux_distribution(full_distribution_name=0)[0]
-if dist in ['redhat', 'centos']:
-    etherwake = 'ether-wake'
-else:
-    etherwake = 'etherwake'
 import subprocess
 import time
 
@@ -85,6 +79,12 @@ from oslo_log import log as logging
 
 from terracotta import common
 from terracotta.utils import db_utils
+
+dist = platform.linux_distribution(full_distribution_name=0)[0]
+if dist in ['redhat', 'centos']:
+    etherwake = 'ether-wake'
+else:
+    etherwake = 'etherwake'
 
 
 global_mgr_ops = [
