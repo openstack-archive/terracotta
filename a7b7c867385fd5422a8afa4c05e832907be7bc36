@@ -1,0 +1,8 @@
+Code-Review+2: wanghao <wanghao749@huawei.com>
+Workflow+1: wanghao <wanghao749@huawei.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 06 Jan 2016 08:37:05 +0000
+Reviewed-on: https://review.openstack.org/263216
+Project: openstack/terracotta
+Branch: refs/heads/master
