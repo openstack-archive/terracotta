@@ -87,8 +87,27 @@ from terracotta import common
 from terracotta.utils import db_utils
 
 
+global_mgr_ops = [
+    cfg.StrOpt('os_admin_user',
+               default='admin',
+               help='The admin user name for authentication '
+                    'with Nova using Keystone.'),
+    cfg.StrOpt('os_admin_password',
+               default='admin',
+               help='The admin user password for authentication '
+                    'with Nova using Keystone.'),
+    cfg.StrOpt('os_admin_tenant_name',
+               default='admin',
+               group='global_manager',
+               help='The admin user password for authentication '
+                    'with Nova using Keystone.'),
+
+]
+
+
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
+CONF.register_opts(global_mgr_ops)
 
 
 def host_mac(host):
