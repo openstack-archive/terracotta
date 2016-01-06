@@ -1,11 +1,13 @@
-# Terracotta: A Framework for Dynamic Consolidation of Virtual Machines in Openstack Clouds
+# Terracotta: A Framework for Dynamic Consolidation of Resources in Openstack Clouds
 
 
 Terracotta is an extension to OpenStack implementing dynamic consolidation
-of Virtual Machines (VMs) using live migration. The major objective of dynamic
-VM consolidation is to improve the utilization of physical resources and reduce
-energy consumption by re-allocating VMs using live migration according to their
-real-time resource demand and switching idle hosts to the sleep mode.
+of resources, e.g. Virtual Machines (VMs) using live migration.
+
+Currently, the major objective is dynamic VM consolidation to improve the utilization
+of physical resources and reduce energy consumption by re-allocating resources using
+live migration according to their real-time resource demand and switching idle hosts to
+the sleep mode.
 
 For example, assume that two VMs are placed on two different hosts, but the
 combined resource capacity required by the VMs to serve the current load can be
@@ -28,7 +30,7 @@ sub-problems:
 - Placing VMs selected for migration to other active or re-activated hosts.
 
 The aim of the Terracotta project is to provide an extensible framework for
-dynamic consolidation of VMs based on the OpenStack platform. The framework
+dynamic consolidation of resources based on the OpenStack platform. The framework
 provides an infrastructure enabling the interaction of components implementing
 the 4 decision-making algorithms listed above. The framework allows
 configuration-driven switching of different implementations of the
