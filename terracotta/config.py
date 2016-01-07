@@ -30,6 +30,15 @@ launch_opt = cfg.ListOpt(
          'global-manager, local-manager, and local-collector.'
 )
 
+use_debugger = cfg.BoolOpt(
+    "use-debugger",
+    default=False,
+    help='Enables debugger. Note that using this option changes how the '
+    'eventlet library is used to support async IO. This could result '
+    'in failures that do not occur under normal operation. '
+    'Use at your own risk.'
+)
+
 default_opts = [
     cfg.StrOpt('global_manager_host', default='controller',
                help='The name of the host running the global manager'),
@@ -70,6 +79,8 @@ api_opts = [
     cfg.IntOpt('port', default=9090, help='Terracotta API server port')
 ]
 
+_API_GROUP = 'api'
+
 pecan_opts = [
     cfg.StrOpt('root', default='terracotta.api.'
                                'controllers.root.RootController',
@@ -85,14 +96,7 @@ pecan_opts = [
                 help='Enables user authentication in pecan.')
 ]
 
-use_debugger = cfg.BoolOpt(
-    "use-debugger",
-    default=False,
-    help='Enables debugger. Note that using this option changes how the '
-    'eventlet library is used to support async IO. This could result '
-    'in failures that do not occur under normal operation. '
-    'Use at your own risk.'
-)
+_PECAN_GROUP = 'pecan'
 
 global_manager_opts = [
     cfg.StrOpt('host', default='0.0.0.0',
@@ -139,6 +143,8 @@ global_manager_opts = [
                 help='A JSON encoded parameters, which will be parsed and '
                      'passed to the specified VM placement algorithm factory')
 ]
+
+_GLOBAL_GROUP = 'global_manager'
 
 local_manager_opts = [
     cfg.StrOpt('host', default='0.0.0.0',
@@ -189,6 +195,8 @@ local_manager_opts = [
                      'passed to the specified VM selection algorithm factory')
 ]
 
+_LOCAL_GROUP = 'local_manager'
+
 collector_opts = [
     cfg.FloatOpt('host_cpu_overload_threshold', default=0.8,
                  help='The threshold on the overall (all cores) utilization '
@@ -204,6 +212,8 @@ collector_opts = [
                help='The message topic that the collector listens on.'),
 ]
 
+_COLLECTOR_GROUP = 'collector'
+
 database_opts = [
     cfg.StrOpt('sql_connection', default='mysql://terracotta:terracottapasswd@'
                                          'controller/terracotta',
@@ -212,15 +222,16 @@ database_opts = [
                     'supported by SQLAlchemy')
 ]
 
-CONF = cfg.CONF
+_DATABASE_GROUP = 'database'
 
-CONF.register_opts(pecan_opts, group='pecan')
+CONF = cfg.CONF
 CONF.register_opts(default_opts, group='DEFAULT')
-CONF.register_opts(api_opts, group='api')
-CONF.register_opts(global_manager_opts, group='global_manager')
-CONF.register_opts(local_manager_opts, group='local_manager')
-CONF.register_opts(collector_opts, group='collector')
-CONF.register_opts(database_opts, group='database')
+CONF.register_opts(api_opts, group=_API_GROUP)
+CONF.register_opts(pecan_opts, group=_PECAN_GROUP)
+CONF.register_opts(global_manager_opts, group=_GLOBAL_GROUP)
+CONF.register_opts(local_manager_opts, group=_LOCAL_GROUP)
+CONF.register_opts(collector_opts, group=_COLLECTOR_GROUP)
+CONF.register_opts(database_opts, group=_DATABASE_GROUP)
 
 CONF.register_cli_opt(use_debugger)
 CONF.register_cli_opt(launch_opt)
@@ -235,3 +246,13 @@ def parse_args(args=None, usage=None, default_config_files=None):
         usage=usage,
         default_config_files=default_config_files
     )
+
+
+def _config_options():
+    return [(None, default_opts),
+            (_API_GROUP, api_opts),
+            (_PECAN_GROUP, pecan_opts),
+            (_GLOBAL_GROUP, global_manager_opts),
+            (_LOCAL_GROUP, local_manager_opts),
+            (_COLLECTOR_GROUP, collector_opts),
+            (_DATABASE_GROUP, database_opts)]
