@@ -96,12 +96,6 @@ global_mgr_ops = [
                default='admin',
                help='The admin user password for authentication '
                     'with Nova using Keystone.'),
-    cfg.StrOpt('os_admin_tenant_name',
-               default='admin',
-               group='global_manager',
-               help='The admin user password for authentication '
-                    'with Nova using Keystone.'),
-
 ]
 
 
@@ -308,8 +302,7 @@ class GlobalManager(object):
                                       service_type="compute"),
                 'hashed_username': sha1(CONF.os_admin_user).hexdigest(),
                 'hashed_password': sha1(CONF.os_admin_password).hexdigest(),
-                'compute_hosts': common.parse_compute_hosts(
-                    CONF.global_manager.compute_hosts),
+                'compute_hosts': CONF.global_manager.compute_hosts,
                 'host_macs': {}}
 
     def switch_hosts_on(self, hosts):
