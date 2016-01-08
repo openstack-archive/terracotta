@@ -132,6 +132,14 @@ local_manager_opts = [
                help='he directory used by the data collector to store '
                     'the data on the resource usage by the VMs running '
                     'on the host.'),
+    cfg.IntOpt('data_collector_interval',
+               default=300,
+               help='The time interval between subsequent invocations '
+                    'of the data collector in seconds.'),
+    cfg.IntOpt('network_migration_bandwidth',
+               default=10,
+               help='The network bandwidth in MB/s available for '
+                    'VM migration.')
 ]
 
 

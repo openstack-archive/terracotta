@@ -156,9 +156,8 @@ local_manager_opts = [
                help='The fully qualified name of a Python factory function '
                     'that returns a function implementing an underload '
                     'detection algorithm'),
-    cfg.DictOpt('algorithm_underload_detection_parameters',
-                default={'threshold': 0.5,
-                         'n': 2},
+    cfg.StrOpt('algorithm_underload_detection_parameters',
+                default="{'threshold': 0.5, 'n': 2}",
                 help='A JSON encoded parameters, which will be parsed and '
                      'passed to the specified underload detection algorithm '
                      'factory'),
@@ -167,13 +166,13 @@ local_manager_opts = [
                help='The fully qualified name of a Python factory function '
                     'that returns a function implementing an overload '
                     'detection algorithm'),
-    cfg.DictOpt('algorithm_overload_detection_parameters',
-                default={'state_config': [0.8],
-                         'otf': 0.1,
-                         'history_size': 500,
-                         'window_sizes': [30, 40, 50, 60, 70, 80, 90, 100],
-                         'bruteforce_step': 0.5,
-                         'learning_steps': 10},
+    cfg.StrOpt('algorithm_overload_detection_parameters',
+                default="'state_config': [0.8],"
+                         "'otf': 0.1,"
+                         "'history_size': 500,"
+                         "'window_sizes': [30, 40, 50, 60, 70, 80, 90, 100],"
+                         "'bruteforce_step': 0.5,"
+                         "'learning_steps': 10}",
                 help='A JSON encoded parameters, which will be parsed and '
                      'passed to the specified overload detection algorithm '
                      'factory'),
@@ -183,7 +182,7 @@ local_manager_opts = [
                help='The fully qualified name of a Python factory function '
                     'that returns a function implementing a VM selection '
                     'algorithm'),
-    cfg.DictOpt('algorithm_vm_selection_parameters',
+    cfg.StrOpt('algorithm_vm_selection_parameters',
                 default={'last_n': 2},
                 help='A JSON encoded parameters, which will be parsed and '
                      'passed to the specified VM selection algorithm factory')
