@@ -353,8 +353,7 @@ class Collector(periodic_task.PeriodicTasks):
         :param current_vms: A list of VM at the current time frame.
         :return: A list of VM UUIDs removed since the last time frame.
         """
-        return substract_lists(previous_vms, current_vms)
-
+        return self.substract_lists(previous_vms, current_vms)
 
     def substract_lists(self, list1, list2):
         """ Return the elements of list1 that are not in list2.
