@@ -16,6 +16,7 @@ from oslo_config import cfg
 import pecan
 
 from terracotta.api import access_control
+from terracotta import context as ctx
 
 
 def get_pecan_config():
