@@ -17,12 +17,13 @@ import eventlet
 import os
 from oslo_config import cfg
 from oslo_log import log as logging
-from wsgiref import simple_server
+
 import sys
 from terracotta.api import app
 from terracotta import config
 from terracotta import rpc
 from terracotta import version
+from wsgiref import simple_server
 
 eventlet.monkey_patch(
     os=True,
@@ -103,4 +104,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

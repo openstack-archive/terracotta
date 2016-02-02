@@ -13,21 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" This is the main module of the MHOD algorithm.
+"""This is the main module of the MHOD algorithm.
 """
 
 from oslo_log import log as logging
 
-import terracotta.locals.overload.mhod.multisize_estimation as estimation
 import terracotta.locals.overload.mhod.bruteforce as bruteforce
 from terracotta.locals.overload.mhod.l_2_states import ls
+import terracotta.locals.overload.mhod.multisize_estimation as estimation
 
 
 LOG = logging.getLogger(__name__)
 
 
 def mhod_factory(time_step, migration_time, params):
-    """ Creates the MHOD algorithm.
+    """Creates the MHOD algorithm.
 
     :param time_step: The length of the simulation time step in seconds.
     :param migration_time: The VM migration time in time seconds.
@@ -54,7 +54,7 @@ def mhod_factory(time_step, migration_time, params):
 
 
 def init_state(history_size, window_sizes, number_of_states):
-    """ Initialize the state dictionary of the MHOD algorithm.
+    """Initialize the state dictionary of the MHOD algorithm.
 
     :param history_size: The number of last system states to store.
     :param window_sizes: The required window sizes.
@@ -78,7 +78,7 @@ def init_state(history_size, window_sizes, number_of_states):
 
 def mhod(state_config, otf, window_sizes, bruteforce_step, learning_steps,
          time_step, migration_time, utilization, state):
-    """ The MHOD algorithm returning whether the host is overloaded.
+    """The MHOD algorithm returning whether the host is overloaded.
 
     :param state_config: The state configuration.
     :param otf: The OTF parameter.
@@ -147,7 +147,8 @@ def mhod(state_config, otf, window_sizes, bruteforce_step, learning_steps,
     #    if utilization_length > state['time_in_states'] + 1:
     #        for s in utilization_to_states(
     #                state_config,
-    #                utilization[-(utilization_length - state['time_in_states']):]):
+    #                utilization[-(utilization_length -
+    # state['time_in_states']):]):
     #            state['time_in_states'] += 1
     #            if s == state_n:
     #                state['time_in_state_n'] += 1
@@ -165,7 +166,7 @@ def mhod(state_config, otf, window_sizes, bruteforce_step, learning_steps,
 
     if utilization_length >= learning_steps:
         if current_state == state_n and p[state_n][state_n] > 0:
-        # if p[current_state][state_n] > 0:
+            # if p[current_state][state_n] > 0:
             policy = bruteforce.optimize(
                 bruteforce_step, 1.0, otf, (migration_time / time_step), ls, p,
                 state_vector, state['time_in_states'],
@@ -180,7 +181,7 @@ def mhod(state_config, otf, window_sizes, bruteforce_step, learning_steps,
 
 
 def build_state_vector(state_config, utilization):
-    """ Build the current state PMF corresponding to the utilization
+    """Build the current state PMF corresponding to the utilization
         history and state config.
 
     :param state_config: The state configuration.
@@ -192,7 +193,7 @@ def build_state_vector(state_config, utilization):
 
 
 def utilization_to_state(state_config, utilization):
-    """ Transform a utilization value into the corresponding state.
+    """Transform a utilization value into the corresponding state.
 
     :param state_config: The state configuration.
     :param utilization: A utilization value.
@@ -207,7 +208,8 @@ def utilization_to_state(state_config, utilization):
 
 
 def get_current_state(state_vector):
-    """ Get the current state corresponding to the state probability vector.
+    """Get the current state corresponding to the state probability
+    vector.
 
     :param state_vector: The state PMF vector.
     :return: The current state.
@@ -216,10 +218,8 @@ def get_current_state(state_vector):
 
 
 def utilization_to_states(state_config, utilization):
-    """ Get the state history corresponding to the utilization history.
-
+    """Get the state history corresponding to the utilization history.
     Adds the 0 state to the beginning to simulate the first transition.
-
     (map (partial utilization-to-state state-config) utilization))
 
     :param state_config: The state configuration.
@@ -230,7 +230,7 @@ def utilization_to_states(state_config, utilization):
 
 
 def issue_command_deterministic(policy):
-    """ Issue a migration command according to the policy PMF p.
+    """Issue a migration command according to the policy PMF p.
 
     :param policy: A policy PMF.
     :return: A migration command.

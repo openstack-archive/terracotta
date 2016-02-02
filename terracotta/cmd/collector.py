@@ -14,14 +14,15 @@
 
 
 import eventlet
+import os
 from oslo_config import cfg
 from oslo_log import log as logging
 import oslo_messaging as messaging
 import sys
 from terracotta import config
-from terracotta import rpc
 from terracotta.locals import collector
 from terracotta.openstack.common import threadgroup
+from terracotta import rpc
 from terracotta import version
 
 eventlet.monkey_patch(
@@ -31,7 +32,7 @@ eventlet.monkey_patch(
     thread=False if '--use-debugger' in sys.argv else True,
     time=True)
 
-import os
+
 
 POSSIBLE_TOPDIR = os.path.normpath(os.path.join(os.path.abspath(sys.argv[0]),
                                                 os.pardir,
@@ -117,4 +118,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

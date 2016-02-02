@@ -17,6 +17,7 @@ from oslo_log import log as logging
 import oslo_messaging as messaging
 from oslo_messaging.rpc import client
 
+from terracotta import context as auth_ctx
 from terracotta import exceptions as exc
 
 
@@ -96,7 +97,7 @@ def wrap_messaging_exception(method):
     return decorator
 
 
-class EngineClient():
+class EngineClient(object):
     """RPC Engine client."""
 
     def __init__(self, transport):
@@ -121,7 +122,7 @@ class LocalManagerServer(object):
         self._executor = manager
 
 
-class ExecutorClient():
+class ExecutorClient(object):
     """RPC Executor client."""
 
     def __init__(self, transport):

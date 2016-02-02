@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" Trivial underload detection algorithms.
+"""Trivial underload detection algorithms.
 """
 
 
 def always_underloaded_factory(time_step, migration_time, params):
-    """ Creates an algorithm that always considers the host underloaded.
+    """Creates an algorithm that always considers the host underloaded.
 
     :param time_step: The length of the simulation time step in seconds.
     :param migration_time: The VM migration time in time seconds.
@@ -28,7 +28,7 @@ def always_underloaded_factory(time_step, migration_time, params):
 
 
 def threshold_factory(time_step, migration_time, params):
-    """ Creates the threshold underload detection algorithm.
+    """Creates the threshold underload detection algorithm.
 
     :param time_step: The length of the simulation time step in seconds.
     :param migration_time: The VM migration time in time seconds.
@@ -39,8 +39,9 @@ def threshold_factory(time_step, migration_time, params):
                                                       utilization),
                                             {})
 
+
 def last_n_average_threshold_factory(time_step, migration_time, params):
-    """ Creates the averaging threshold underload detection algorithm.
+    """Creates the averaging threshold underload detection algorithm.
 
     :param time_step: The length of the simulation time step in seconds.
     :param migration_time: The VM migration time in time seconds.
@@ -55,7 +56,7 @@ def last_n_average_threshold_factory(time_step, migration_time, params):
 
 
 def threshold(threshold, utilization):
-    """ Static threshold-based underload detection algorithm.
+    """Static threshold-based underload detection algorithm.
 
     The algorithm returns True, if the last value of the host's
     CPU utilization is lower than the specified threshold.
@@ -70,7 +71,7 @@ def threshold(threshold, utilization):
 
 
 def last_n_average_threshold(threshold, n, utilization):
-    """ Averaging static threshold-based underload detection algorithm.
+    """Averaging static threshold-based underload detection algorithm.
 
     The algorithm returns True, if the average of the last n values of
     the host's CPU utilization is lower than the specified threshold.

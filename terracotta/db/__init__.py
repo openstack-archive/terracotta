@@ -16,4 +16,4 @@
 DB abstraction for Terracotta
 """
 
-from terracotta.db.api import *
+import terracotta.db.api
