@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" OTF threshold based algorithms.
+"""OTF threshold based algorithms.
 """
 
 from oslo_log import log as logging
@@ -22,7 +22,7 @@ LOG = logging.getLogger(__name__)
 
 
 def otf_factory(time_step, migration_time, params):
-    """ Creates the OTF algorithm with limiting and migration time.
+    """Creates the OTF algorithm with limiting and migration time.
 
     :param time_step: The length of the simulation time step in seconds.
     :param migration_time: The VM migration time in time seconds.
@@ -30,6 +30,7 @@ def otf_factory(time_step, migration_time, params):
     :return: A function implementing the OTF algorithm.
     """
     migration_time_normalized = float(migration_time) / time_step
+
     def otf_wrapper(utilization, state=None):
         if state is None or state == {}:
             state = {'overload': 0,
@@ -45,7 +46,7 @@ def otf_factory(time_step, migration_time, params):
 
 
 def otf(otf, threshold, limit, migration_time, utilization, state):
-    """ The OTF threshold algorithm with limiting and migration time.
+    """The OTF threshold algorithm with limiting and migration time.
 
     :param otf: The threshold on the OTF value.
     :param threshold: The utilization overload threshold.
@@ -66,16 +67,17 @@ def otf(otf, threshold, limit, migration_time, utilization, state):
     LOG.debug('OTF:' + str(float(state['overload']) / state['total']))
     LOG.debug('OTF migration time:' + str(migration_time))
     LOG.debug('OTF + migration time:' +
-              str((migration_time + state['overload']) / \
-                      (migration_time + state['total'])))
+              str((migration_time + state['overload']
+                   ) / (migration_time + state['total'])))
     LOG.debug('OTF decision:' +
-              str(overload and (migration_time + state['overload']) / \
-                      (migration_time + state['total']) >= otf))
+              str(overload and (
+                  migration_time + state['overload']) / (
+                  migration_time + state['total']) >= otf))
 
     if not overload or len(utilization) < limit:
         decision = False
     else:
-        decision = (migration_time + state['overload']) / \
-            (migration_time + state['total']) >= otf
+        decision = (migration_time + state['overload']) / (
+            migration_time + state['total']) >= otf
 
-    return (decision, state)
+    return decision, state

@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" Functions for solving NLP problems using the bruteforce method.
+"""Functions for solving NLP problems using the bruteforce method.
 """
 
 import nlp
@@ -21,7 +21,7 @@ from terracotta.common import frange
 
 
 def solve2(objective, constraint, step, limit):
-    """ Solve a maximization problem for 2 states.
+    """Solve a maximization problem for 2 states.
 
     :param objective: The objective function.
     :param constraint: A tuple representing the constraint.
@@ -46,7 +46,7 @@ def solve2(objective, constraint, step, limit):
 
 def optimize(step, limit, otf, migration_time, ls, p, state_vector,
              time_in_states, time_in_state_n):
-    """ Solve a MHOD optimization problem.
+    """Solve a MHOD optimization problem.
 
     :param step: The step size for the bruteforce algorithm.
     :param limit: The maximum value of the variables.

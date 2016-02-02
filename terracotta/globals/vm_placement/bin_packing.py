@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" Bin Packing based VM placement algorithms.
+"""Bin Packing based VM placement algorithms.
 """
 
 from oslo_log import log as logging
@@ -23,7 +23,7 @@ LOG = logging.getLogger(__name__)
 
 
 def best_fit_decreasing_factory(time_step, migration_time, params):
-    """ Creates the Best Fit Decreasing (BFD) heuristic for VM placement.
+    """Creates the Best Fit Decreasing (BFD) heuristic for VM placement.
 
     :param time_step: The length of the simulation time step in seconds.
     :param migration_time: The VM migration time in time seconds.
@@ -52,7 +52,7 @@ def best_fit_decreasing_factory(time_step, migration_time, params):
 
 
 def get_available_resources(threshold, usage, total):
-    """ Get a map of the available resource capacity.
+    """Get a map of the available resource capacity.
 
     :param threshold: A threshold on the maximum allowed resource usage.
     :param usage: A map of hosts to the resource usage.
@@ -66,7 +66,7 @@ def get_available_resources(threshold, usage, total):
 def best_fit_decreasing(last_n_vm_cpu, hosts_cpu, hosts_ram,
                         inactive_hosts_cpu, inactive_hosts_ram,
                         vms_cpu, vms_ram):
-    """ The Best Fit Decreasing (BFD) heuristic for placing VMs on hosts.
+    """The Best Fit Decreasing (BFD) heuristic for placing VMs on hosts.
 
     :param last_n_vm_cpu: The last n VM CPU usage values to average.
     :param hosts_cpu: A map of host names and their available CPU in MHz.
@@ -104,8 +104,7 @@ def best_fit_decreasing(last_n_vm_cpu, hosts_cpu, hosts_ram,
         mapped = False
         while not mapped:
             for _, _, host in hosts:
-                if hosts_cpu[host] >= vm_cpu and \
-                    hosts_ram[host] >= vm_ram:
+                if hosts_cpu[host] >= vm_cpu and hosts_ram[host] >= vm_ram:
                         mapping[vm_uuid] = host
                         hosts_cpu[host] -= vm_cpu
                         hosts_ram[host] -= vm_ram

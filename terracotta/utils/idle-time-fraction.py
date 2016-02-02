@@ -1,5 +1,3 @@
-#!/usr/bin/python2
-
 # Copyright 2012 Anton Beloglazov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
-import os
-import random
-import shutil
-import time
 from datetime import datetime
-from db import init_db
+from db_utils import init_db
+
+import sys
+import time
+
 
 if len(sys.argv) < 5:
     print 'You must specify 4 arguments:'
@@ -30,14 +27,13 @@ if len(sys.argv) < 5:
     print '4. The finish datetime in the format: %Y-%m-%d %H:%M:%S'
     sys.exit(1)
 
-db = init_db('mysql://' + sys.argv[1] + ':' + sys.argv[2] + '@localhost/spe')
+db = init_db(
+    'mysql://' + sys.argv[1] + ':' + sys.argv[2] + '@localhost/spe')
 start_time = datetime.fromtimestamp(
     time.mktime(time.strptime(sys.argv[3], '%Y-%m-%d %H:%M:%S')))
 finish_time = datetime.fromtimestamp(
     time.mktime(time.strptime(sys.argv[4], '%Y-%m-%d %H:%M:%S')))
 
-#print "Start time: " + str(start_time)
-#print "Finish time: " + str(finish_time)
 
 def total_seconds(delta):
     return (delta.microseconds + 
@@ -49,13 +45,15 @@ for hostname, host_id in db.select_host_ids().items():
     prev_timestamp = start_time
     prev_state = 1
     states = {0: [], 1: []}
-    for timestamp, state in db.select_host_states(host_id, start_time, finish_time):
+    for timestamp, state in db.select_host_states(
+            host_id,start_time, finish_time):
         if prev_timestamp:
-            states[prev_state].append(total_seconds(timestamp - prev_timestamp))
+            states[prev_state].append(total_seconds(
+                timestamp - prev_timestamp))
         prev_timestamp = timestamp
         prev_state = state
-    states[prev_state].append(total_seconds(finish_time - prev_timestamp))
-    #print states
+    states[prev_state].append(total_seconds(
+        finish_time - prev_timestamp))
     off_time = sum(states[0])
     on_time = sum(states[1])
     total_time += off_time + on_time
@@ -63,4 +61,5 @@ for hostname, host_id in db.select_host_ids().items():
 
 print "Total time: " + str(total_time)
 print "Total idle time: " + str(total_idle_time)
-print "Idle time fraction: " + str(float(total_idle_time) / total_time)
+print "Idle time fraction: " + str(
+    float(total_idle_time) / total_time)
