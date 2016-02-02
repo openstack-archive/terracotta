@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" L functions for the 2 state configuration of the MHOD algorithm.
+"""L functions for the 2 state configuration of the MHOD algorithm.
 """
 
 
 def l0(p_initial, p_matrix, m):
-    """ Compute the L0 function.
+    """Compute the L0 function.
 
     :param p_initial: The initial state distribution.
     :param p_matrix: A matrix of transition probabilities.
@@ -40,7 +40,7 @@ def l0(p_initial, p_matrix, m):
 
 
 def l1(p_initial, p_matrix, m):
-    """ Compute the L1 function.
+    """Compute the L1 function.
 
     :param p_initial: The initial state distribution.
     :param p_matrix: A matrix of transition probabilities.

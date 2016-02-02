@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" The main local manager module.
+"""The main local manager module.
 
 The local manager component is deployed on every compute host and is
 invoked periodically to determine when it necessary to reallocate VM
@@ -103,7 +103,6 @@ local manager performs the following steps:
 from hashlib import sha1
 import libvirt
 import os
-import time
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -146,12 +145,12 @@ class LocalManager(periodic_task.PeriodicTasks):
         self.state = self.init_state()
 
     def init_state(self):
-        """ Initialize a dict for storing the state of the local manager.
+        """Initialize a dict for storing the state of the local manager.
 
         :param config: A config dictionary.
          :type config: dict(str: *)
 
-        :return: A dictionary containing the initial state of the local manager.
+        :return: A dictionary, initial state of the local manager.
          :rtype: dict
         """
         vir_connection = libvirt.openReadOnly(None)
@@ -173,7 +172,7 @@ class LocalManager(periodic_task.PeriodicTasks):
 
     @periodic_task.periodic_task(spacing=10, run_immediately=True)
     def execute(self, ctx=None):
-        """ Execute an iteration of the local manager.
+        """Execute an iteration of the local manager.
 
         1. Read the data on resource usage by the VMs running on the host from
            the <local_data_directory>/vm directory.
@@ -201,7 +200,6 @@ class LocalManager(periodic_task.PeriodicTasks):
            global manager and pass a list of the UUIDs of the VMs selected by
            the VM selection algorithm in the vm_uuids parameter, as well as
            the reason for migration as being 1.
-
         """
         LOG.info('Started an iteration')
         state = self.state
@@ -302,9 +300,8 @@ class LocalManager(periodic_task.PeriodicTasks):
         LOG.info('Completed an iteration')
         self.state = state
 
-
     def get_local_vm_data(self, path):
-        """ Read the data about VMs from the local storage.
+        """Read the data about VMs from the local storage.
 
         :param path: A path to read VM UUIDs from.
         :return: A map of VM UUIDs onto the corresponing CPU MHz values.
@@ -315,13 +312,11 @@ class LocalManager(periodic_task.PeriodicTasks):
                 result[uuid] = [int(x) for x in f.read().strip().splitlines()]
         return result
 
-
     def get_local_host_data(self, path):
-        """ Read the data about the host from the local storage.
+        """Read the data about the host from the local storage.
 
         :param path: A path to read the host data from.
         :return: A history of the host CPU usage in MHz.
-
         """
         if not os.access(path, os.F_OK):
             return []
@@ -329,23 +324,20 @@ class LocalManager(periodic_task.PeriodicTasks):
             result = [int(x) for x in f.read().strip().splitlines()]
         return result
 
-
     def cleanup_vm_data(self, vm_data, uuids):
-        """ Remove records for the VMs that are not in the list of UUIDs.
+        """Remove records for the VMs that are not in the list of UUIDs.
 
         :param vm_data: A map of VM UUIDs to some data.
         :param uuids: A list of VM UUIDs.
         :return: The cleaned up map of VM UUIDs to data.
-
         """
         for uuid, _ in vm_data.items():
             if uuid not in uuids:
                 del vm_data[uuid]
         return vm_data
 
-
     def get_ram(self, vir_connection, vm_ids):
-        """ Get the maximum RAM for a set of VM UUIDs.
+        """Get the maximum RAM for a set of VM UUIDs.
 
         :param vir_connection: A libvirt connection object.
         :param vm_ids: A list of VM UUIDs.
@@ -359,9 +351,8 @@ class LocalManager(periodic_task.PeriodicTasks):
 
         return vms_ram
 
-
     def get_max_ram(self, vir_connection, uuid):
-        """ Get the max RAM allocated to a VM UUID using libvirt.
+        """Get the max RAM allocated to a VM UUID using libvirt.
 
         :param vir_connection: A libvirt connection object.
         :param uuid: The UUID of a VM.
@@ -373,14 +364,13 @@ class LocalManager(periodic_task.PeriodicTasks):
         except libvirt.libvirtError:
             return None
 
-
     def vm_mhz_to_percentage(self, vm_mhz_history, host_mhz_history,
                              physical_cpu_mhz):
-        """ Convert VM CPU utilization to the host's CPU utilization.
+        """Convert VM CPU utilization to the host's CPU utilization.
 
-        :param vm_mhz_history: A list of CPU utilization histories of VMs in MHz.
+        :param vm_mhz_history: List of CPU utilization histories of VMs in MHz.
         :param host_mhz_history: A history if the CPU usage by the host in MHz.
-        :param physical_cpu_mhz: The total frequency of the physical CPU in MHz.
+        :param physical_cpu_mhz: Total frequency of the physical CPU in MHz.
         :return: The history of the host's CPU utilization in percentages.
         """
         max_len = max(len(x) for x in vm_mhz_history)
