@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" VM selection algorithms.
+"""VM selection algorithms.
 """
 
-from random import choice
 import operator
+from random import choice
 
 
 def random_factory(time_step, migration_time, params):
-    """ Creates the random VM selection algorithm.
+    """Creates the random VM selection algorithm.
 
     :param time_step: The length of the simulation time step in seconds.
     :param migration_time: The VM migration time in time seconds.
@@ -31,7 +31,7 @@ def random_factory(time_step, migration_time, params):
 
 
 def minimum_utilization_factory(time_step, migration_time, params):
-    """ Creates the minimum utilization VM selection algorithm.
+    """Creates the minimum utilization VM selection algorithm.
 
     :param time_step: The length of the simulation time step in seconds.
     :param migration_time: The VM migration time in time seconds.
@@ -43,7 +43,7 @@ def minimum_utilization_factory(time_step, migration_time, params):
 
 
 def minimum_migration_time_factory(time_step, migration_time, params):
-    """ Creates the minimum migration time VM selection algorithm.
+    """Creates the minimum migration time VM selection algorithm.
 
     :param time_step: The length of the simulation time step in seconds.
     :param migration_time: The VM migration time in time seconds.
@@ -55,12 +55,14 @@ def minimum_migration_time_factory(time_step, migration_time, params):
 
 
 def minimum_migration_time_max_cpu_factory(time_step, migration_time, params):
-    """ Creates the minimum migration time / max CPU usage VM selection algorithm.
+    """Creates the minimum migration time / max CPU usage
+    VM selection algorithm.
 
     :param time_step: The length of the simulation time step in seconds.
     :param migration_time: The VM migration time in time seconds.
     :param params: A dictionary containing the algorithm's parameters.
-    :return: A function implementing the minimum migration time / max CPU VM selection.
+    :return: A function implementing the minimum migration time / max
+    CPU VM selection.
     """
     return lambda vms_cpu, vms_ram, state=None: \
         ([minimum_migration_time_max_cpu(params['last_n'],
@@ -69,7 +71,7 @@ def minimum_migration_time_max_cpu_factory(time_step, migration_time, params):
 
 
 def minimum_migration_time(vms_ram):
-    """ Selects the VM with the minimum RAM usage.
+    """Selects the VM with the minimum RAM usage.
 
     :param vms_ram: A map of VM UUID and their RAM usage data.
     :return: A VM to migrate from the host.
@@ -80,7 +82,7 @@ def minimum_migration_time(vms_ram):
 
 
 def minimum_utilization(vms_cpu):
-    """ Selects the VM with the minimum CPU utilization.
+    """Selects the VM with the minimum CPU utilization.
 
     :param vms_cpu: A map of VM UUID and their CPU utilization histories.
     :return: A VM to migrate from the host.
@@ -92,7 +94,7 @@ def minimum_utilization(vms_cpu):
 
 
 def random(vms_cpu):
-    """ Selects a random VM.
+    """Selects a random VM.
 
     :param vms_cpu: A map of VM UUID and their CPU utilization histories.
     :return: A VM to migrate from the host.
@@ -101,7 +103,7 @@ def random(vms_cpu):
 
 
 def minimum_migration_time_max_cpu(last_n, vms_cpu, vms_ram):
-    """ Selects the VM with the minimum RAM and maximum CPU usage.
+    """Selects the VM with the minimum RAM and maximum CPU usage.
 
     :param last_n: The number of last CPU utilization values to average.
     :param vms_cpu: A map of VM UUID and their CPU utilization histories.

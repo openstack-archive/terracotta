@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" Trivial overload detection algorithms.
+"""Trivial overload detection algorithms.
 """
 
 
 def never_overloaded_factory(time_step, migration_time, params):
-    """ Creates an algorithm that never considers the host overloaded.
+    """Creates an algorithm that never considers the host overloaded.
 
     :param time_step: The length of the simulation time step in seconds.
     :param migration_time: The VM migration time in time seconds.
@@ -28,7 +28,7 @@ def never_overloaded_factory(time_step, migration_time, params):
 
 
 def threshold_factory(time_step, migration_time, params):
-    """ Creates the static CPU utilization threshold algorithm.
+    """Creates the static CPU utilization threshold algorithm.
 
     :param time_step: The length of the simulation time step in seconds.
     :param migration_time: The VM migration time in time seconds.
@@ -41,7 +41,7 @@ def threshold_factory(time_step, migration_time, params):
 
 
 def last_n_average_threshold_factory(time_step, migration_time, params):
-    """ Creates the averaging CPU utilization threshold algorithm.
+    """Creates the averaging CPU utilization threshold algorithm.
 
     :param time_step: The length of the simulation time step in seconds.
     :param migration_time: The VM migration time in time seconds.
@@ -56,7 +56,7 @@ def last_n_average_threshold_factory(time_step, migration_time, params):
 
 
 def threshold(threshold, utilization):
-    """ The static CPU utilization threshold algorithm.
+    """The static CPU utilization threshold algorithm.
 
     :param threshold: The threshold on the CPU utilization.
     :param utilization: The history of the host's CPU utilization.
@@ -68,7 +68,7 @@ def threshold(threshold, utilization):
 
 
 def last_n_average_threshold(threshold, n, utilization):
-    """ The averaging CPU utilization threshold algorithm.
+    """The averaging CPU utilization threshold algorithm.
 
     :param threshold: The threshold on the CPU utilization.
     :param n: The number of last CPU utilization values to average.
