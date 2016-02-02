@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" Functions for defing the NLP problem of the MHOD algorithm.
+"""Functions for defing the NLP problem of the MHOD algorithm.
 """
 
 import operator
 
 
 def build_objective(ls, state_vector, p):
-    """ Creates an objective function, which is a sum of the L functions.
+    """Creates an objective function, which is a sum of the L functions.
 
     :param ls: A list of L functions.
     :param state-vector: A state vector.
@@ -31,10 +31,9 @@ def build_objective(ls, state_vector, p):
     return objective
 
 
-@contract
 def build_constraint(otf, migration_time, ls, state_vector,
                      p, time_in_states, time_in_state_n):
-    """ Creates an optimization constraint from the L functions.
+    """Creates an optimization constraint from the L functions.
 
     :param otf: The OTF parameter.
     :param migration_time: The VM migration time in time steps.
@@ -53,4 +52,4 @@ def build_constraint(otf, migration_time, ls, state_vector,
                (migration_time +
                 time_in_states +
                 sum(l(state_vector, p, m_list) for l in ls))
-    return (constraint, operator.le, otf)
+    return constraint, operator.le, otf

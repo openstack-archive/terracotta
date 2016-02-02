@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" The main data collector module.
+"""The main data collector module.
 
 The data collector is deployed on every compute host and is executed
 periodically to collect the CPU utilization data for each VM running
@@ -151,7 +151,7 @@ class Collector(periodic_task.PeriodicTasks):
         self.state = self.init_state()
 
     def init_state(self):
-        """ Initialize a dict for storing the state of the data collector."""
+        """Initialize a dict for storing the state of the data collector."""
         vir_connection = libvirt.openReadOnly(None)
         if vir_connection is None:
             message = 'Failed to open a connection to the hypervisor'
@@ -178,7 +178,7 @@ class Collector(periodic_task.PeriodicTasks):
                 'vir_connection': vir_connection,
                 'hostname': hostname,
                 'host_cpu_overload_threshold':
-                    CONF.collector.host_cpu_overload_threshold * \
+                    CONF.collector.host_cpu_overload_threshold *
                     host_cpu_usable_by_vms,
                 'physical_cpus': physical_cpus,
                 'physical_cpu_mhz': host_cpu_mhz,
@@ -187,7 +187,7 @@ class Collector(periodic_task.PeriodicTasks):
 
     @periodic_task.periodic_task(spacing=10, run_immediately=True)
     def execute(self, ctx=None):
-        """ Execute a data collection iteration.
+        """Execute a data collection iteration.
 
         1. Read the names of the files from the <local_data_directory>/vm
            directory to determine the list of VMs running on the host at the
@@ -310,18 +310,16 @@ class Collector(periodic_task.PeriodicTasks):
         LOG.info('Completed an iteration')
         self.state = state
 
-
     def get_previous_vms(self, path):
-        """ Get a list of VM UUIDs from the path.
+        """Get a list of VM UUIDs from the path.
 
         :param path: A path to read VM UUIDs from.
         :return: The list of VM UUIDs from the path.
         """
         return os.listdir(path)
 
-
     def get_current_vms(self, vir_connection):
-        """ Get a dict of VM UUIDs to states from libvirt.
+        """Get a dict of VM UUIDs to states from libvirt.
 
         :param vir_connection: A libvirt connection object.
         :return: The dict of VM UUIDs to states from libvirt.
@@ -335,9 +333,8 @@ class Collector(periodic_task.PeriodicTasks):
                 pass
         return vm_uuids
 
-
     def get_added_vms(self, previous_vms, current_vms):
-        """ Get a list of newly added VM UUIDs.
+        """Get a list of newly added VM UUIDs.
 
         :param previous_vms: A list of VMs at the previous time frame.
         :param current_vms: A list of VM at the current time frame.
@@ -345,9 +342,8 @@ class Collector(periodic_task.PeriodicTasks):
         """
         return self.substract_lists(current_vms, previous_vms)
 
-
     def get_removed_vms(self, previous_vms, current_vms):
-        """ Get a list of VM UUIDs removed since the last time frame.
+        """Get a list of VM UUIDs removed since the last time frame.
 
         :param previous_vms: A list of VMs at the previous time frame.
         :param current_vms: A list of VM at the current time frame.
@@ -356,7 +352,7 @@ class Collector(periodic_task.PeriodicTasks):
         return self.substract_lists(previous_vms, current_vms)
 
     def substract_lists(self, list1, list2):
-        """ Return the elements of list1 that are not in list2.
+        """Return the elements of list1 that are not in list2.
 
         :param list1: The first list.
         :param list2: The second list.
@@ -364,9 +360,8 @@ class Collector(periodic_task.PeriodicTasks):
         """
         return list(set(list1).difference(list2))
 
-
     def cleanup_local_vm_data(self, path, vms):
-        """ Delete the local data related to the removed VMs.
+        """Delete the local data related to the removed VMs.
 
         :param path: A path to remove VM data from.
         :param vms: A list of removed VM UUIDs.
@@ -374,9 +369,8 @@ class Collector(periodic_task.PeriodicTasks):
         for vm in vms:
             os.remove(os.path.join(path, vm))
 
-
     def cleanup_all_local_data(self, path):
-        """ Delete all the local data about VMs.
+        """Delete all the local data about VMs.
 
         :param path: A path to the local data directory.
         """
@@ -386,9 +380,8 @@ class Collector(periodic_task.PeriodicTasks):
         if os.access(host_path, os.F_OK):
             os.remove(host_path)
 
-
     def fetch_remote_data(self, db, data_length, uuids):
-        """ Fetch VM data from the central DB.
+        """Fetch VM data from the central DB.
 
         :param db: The database object.
         :param data_length: The length of data to fetch.
@@ -400,9 +393,8 @@ class Collector(periodic_task.PeriodicTasks):
             result[uuid] = db.select_cpu_mhz_for_vm(uuid, data_length)
         return result
 
-
     def write_vm_data_locally(self, path, data, data_length):
-        """ Write a set of CPU MHz values for a set of VMs.
+        """Write a set of CPU MHz values for a set of VMs.
 
         :param path: A path to write the data to.
         :param data: A map of VM UUIDs onto the corresponing CPU MHz history.
@@ -414,9 +406,8 @@ class Collector(periodic_task.PeriodicTasks):
                     f.write('\n'.join([str(x)
                                        for x in values[-data_length:]]) + '\n')
 
-
     def append_vm_data_locally(self, path, data, data_length):
-        """ Write a CPU MHz value for each out of a set of VMs.
+        """Write a CPU MHz value for each out of a set of VMs.
 
         :param path: A path to write the data to.
         :param data: A map of VM UUIDs onto the corresponing CPU MHz values.
@@ -435,18 +426,16 @@ class Collector(periodic_task.PeriodicTasks):
                     f.seek(0)
                     f.write('\n'.join([str(x) for x in values]) + '\n')
 
-
     def append_vm_data_remotely(self, db, data):
-        """ Submit CPU MHz values to the central database.
+        """Submit CPU MHz values to the central database.
 
         :param db: The database object.
         :param data: A map of VM UUIDs onto the corresponing CPU MHz values.
         """
         db.insert_vm_cpu_mhz(data)
 
-
     def append_host_data_locally(self, path, cpu_mhz, data_length):
-        """ Write a CPU MHz value for the host.
+        """Write a CPU MHz value for the host.
 
         :param path: A path to write the data to.
         :param cpu_mhz: A CPU MHz value.
@@ -463,9 +452,8 @@ class Collector(periodic_task.PeriodicTasks):
                 f.seek(0)
                 f.write('\n'.join([str(x) for x in values]) + '\n')
 
-
     def append_host_data_remotely(self, db, hostname, host_cpu_mhz):
-        """ Submit a host CPU MHz value to the central database.
+        """Submit a host CPU MHz value to the central database.
 
         :param db: The database object.
         :param hostname: The host name.
@@ -473,14 +461,13 @@ class Collector(periodic_task.PeriodicTasks):
         """
         db.insert_host_cpu_mhz(hostname, host_cpu_mhz)
 
-
-    def get_cpu_mhz(self, vir_connection, physical_core_mhz, previous_cpu_time,
-                    previous_time, current_time, current_vms,
-                    previous_cpu_mhz, added_vm_data):
-        """ Get the average CPU utilization in MHz for a set of VMs.
+    def get_cpu_mhz(self, vir_connection, physical_core_mhz,
+                    previous_cpu_time, previous_time, current_time,
+                    current_vms, previous_cpu_mhz, added_vm_data):
+        """Get the average CPU utilization in MHz for a set of VMs.
 
         :param vir_connection: A libvirt connection object.
-        :param physical_core_mhz: The core frequency of the physical CPU in MHz.
+        :param physical_core_mhz: The core freq of the physical CPU in MHz.
         :param previous_cpu_time: A dict of previous CPU times for the VMs.
         :param previous_time: The previous timestamp.
         :param current_time: The previous timestamp.
@@ -529,9 +516,8 @@ class Collector(periodic_task.PeriodicTasks):
 
         return previous_cpu_time, cpu_mhz
 
-
     def get_cpu_time(self, vir_connection, uuid):
-        """ Get the CPU time of a VM specified by the UUID using libvirt.
+        """Get the CPU time of a VM specified by the UUID using libvirt.
 
         :param vir_connection: A libvirt connection object.
         :param uuid: The UUID of a VM.
@@ -543,10 +529,9 @@ class Collector(periodic_task.PeriodicTasks):
         except libvirt.libvirtError:
             return 0
 
-
     def calculate_cpu_mhz(self, cpu_mhz, previous_time, current_time,
                           previous_cpu_time, current_cpu_time):
-        """ Calculate the average CPU utilization in MHz for a period of time.
+        """Calculate the average CPU utilization in MHz for a period of time.
 
         :param cpu_mhz: The frequency of a core of the physical CPU in MHz.
         :param previous_time: The previous time.
@@ -555,26 +540,27 @@ class Collector(periodic_task.PeriodicTasks):
         :param current_cpu_time: The current CPU time of the domain.
         :return: The average CPU utilization in MHz.
         """
-        return int(cpu_mhz * float(current_cpu_time - previous_cpu_time) / \
-                   ((current_time - previous_time) * 1000000000))
-
+        return int(cpu_mhz * float(
+            current_cpu_time - previous_cpu_time) / (
+            (current_time - previous_time) * 1000000000))
 
     def get_host_cpu_mhz(self, cpu_mhz, previous_cpu_time_total,
                          previous_cpu_time_busy):
-        """ Get the average CPU utilization in MHz for a set of VMs.
+        """Get the average CPU utilization in MHz for a set of VMs.
 
         :param cpu_mhz: The total frequency of the physical CPU in MHz.
         :param previous_cpu_time_total: The previous total CPU time.
         :param previous_cpu_time_busy: The previous busy CPU time.
-        :return: The current total and busy CPU time, and CPU utilization in MHz.
+        :return: The  total and busy CPU time and CPU utilization in MHz.
         """
         cpu_time_total, cpu_time_busy = self.get_host_cpu_time()
-        cpu_usage = int(cpu_mhz * (cpu_time_busy - previous_cpu_time_busy) / \
-                        (cpu_time_total - previous_cpu_time_total))
+        cpu_usage = int(cpu_mhz * (
+            cpu_time_busy - previous_cpu_time_busy) / (
+            cpu_time_total - previous_cpu_time_total))
         if cpu_usage < 0:
             raise ValueError(
-                'The host CPU usage in MHz must be >=0, but it is: ' + str(
-                    cpu_usage) +
+                'The host CPU usage in MHz must be >=0, '
+                'but it is: ' + str(cpu_usage) +
                 '; cpu_mhz=' + str(cpu_mhz) +
                 '; previous_cpu_time_total=' + str(previous_cpu_time_total) +
                 '; cpu_time_total=' + str(cpu_time_total) +
@@ -582,9 +568,8 @@ class Collector(periodic_task.PeriodicTasks):
                 '; cpu_time_busy=' + str(cpu_time_busy))
         return cpu_time_total, cpu_time_busy, cpu_usage
 
-
     def get_host_cpu_time(self):
-        """ Get the total and busy CPU time of the host.
+        """Get the total and busy CPU time of the host.
 
         :return: A tuple of the total and busy CPU time.
         """
@@ -592,9 +577,8 @@ class Collector(periodic_task.PeriodicTasks):
             values = [float(x) for x in f.readline().split()[1:8]]
             return sum(values), sum(values[0:3])
 
-
     def get_host_characteristics(self, vir_connection):
-        """ Get the total CPU MHz and RAM of the host.
+        """Get the total CPU MHz and RAM of the host.
 
         :param vir_connection: A libvirt connection object.
         :return: A tuple of the total CPU MHz and RAM of the host.
@@ -602,11 +586,10 @@ class Collector(periodic_task.PeriodicTasks):
         info = vir_connection.getInfo()
         return info[2] * info[3], info[1]
 
-
     def log_host_overload(self, db, overload_threshold, hostname,
                           previous_overload,
                           host_total_mhz, host_utilization_mhz):
-        """ Log to the DB whether the host is overloaded.
+        """Log to the DB whether the host is overloaded.
 
         :param db: The database object.
         :param overload_threshold: The host overload threshold.
