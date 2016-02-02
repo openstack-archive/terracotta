@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" The database cleaner module.
+"""The database cleaner module.
 
 The database cleaner periodically cleans up the data on resource usage
 by VMs stored in the database. This is requried to avoid excess growth
@@ -22,24 +22,22 @@ of the database size.
 
 import datetime
 
-from oslo_config import cfg
 from oslo_log import log as logging
 
 import terracotta.common as common
-from terracotta.config import *
-from terracotta.utils.db_utils import *
+from terracotta.config import cfg
+from terracotta.utils.db_utils import init_db
 
-
+CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 
 
 def start():
-    """ Start the database cleaner loop.
+    """Start the database cleaner loop.
 
     :return: The final state.
     """
-    config = read_and_validate_config([DEFAULT_CONFIG_PATH, CONFIG_PATH],
-                                      REQUIRED_FIELDS)
+    config = CONF
 
     common.init_logging(
         config['log_directory'],
@@ -57,7 +55,7 @@ def start():
 
 
 def init_state(config):
-    """ Initialize a dict for storing the state of the database cleaner.
+    """Initialize a dict for storing the state of the database cleaner.
 
     :param config: A config dictionary.
     :return: A dictionary containing the initial state of the database cleaner.
@@ -69,7 +67,7 @@ def init_state(config):
 
 
 def execute(config, state):
-    """ Execute an iteration of the database cleaner.
+    """Execute an iteration of the database cleaner.
 
     :param config: A config dictionary.
     :param state: A state dictionary.
@@ -84,7 +82,7 @@ def execute(config, state):
 
 
 def today():
-    """ Return the today's datetime.
+    """Return the today's datetime.
 
     :return: A datetime object representing current date and time.
     """
