@@ -19,14 +19,15 @@ SQLAlchemy models for Terracotta data.
 from oslo_config import cfg
 from oslo_db.sqlalchemy import models
 from oslo_utils import timeutils
-from sqlalchemy import Column, Integer, String, Text, schema
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import ForeignKey, DateTime, Boolean
-from sqlalchemy.orm import relationship, backref, validates
+from sqlalchemy import DateTime, Boolean
+from sqlalchemy.orm import relationship
 
 
 CONF = cfg.CONF
 BASE = declarative_base()
+
 
 class TerracottaBase(models.TimestampMixin,
                  models.ModelBase):
@@ -67,6 +68,7 @@ class HostResourceUsage(BASE, TerracottaBase):
     host = relationship(Host, backref="host_resource_usage",
                         foreign_keys=host_id,
                         primaryjoin='HostResourceUsage.host_id == Host.id')
+
 
 class VM(BASE, TerracottaBase):
     __tablename__ = 'vms'

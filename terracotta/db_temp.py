@@ -13,23 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import datetime
-from sqlalchemy import *
-from sqlalchemy.engine.base import Connection
 
 from oslo_log import log as logging
-
+from sqlalchemy import and_
+from sqlalchemy import select
 
 LOG = logging.getLogger(__name__)
 
 
 class Database(object):
-    """ A class representing the database, where fields are tables.
+    """A class representing the database, where fields are tables.
     """
 
     def __init__(self, connection, hosts, host_resource_usage, vms,
                  vm_resource_usage, vm_migrations, host_states, host_overload):
-        """ Initialize the database.
+        """Initialize the database.
 
         :param connection: A database connection table.
         :param hosts: The hosts table.
@@ -51,7 +49,7 @@ class Database(object):
         LOG.debug('Instantiated a Database object')
 
     def select_cpu_mhz_for_vm(self, uuid, n):
-        """ Select n last values of CPU MHz for a VM UUID.
+        """Select n last values of CPU MHz for a VM UUID.
 
         :param uuid: The UUID of a VM.
         :param n: The number of last values to select.
@@ -67,7 +65,7 @@ class Database(object):
         return list(reversed([int(x[0]) for x in res]))
 
     def select_last_cpu_mhz_for_vms(self):
-        """ Select the last value of CPU MHz for all the VMs.
+        """Select the last value of CPU MHz for all the VMs.
 
         :return: A dict of VM UUIDs to the last CPU MHz values.
         """
@@ -77,7 +75,7 @@ class Database(object):
             vru1.outerjoin(vru2, and_(
                 vru1.c.vm_id == vru2.c.vm_id,
                 vru1.c.id < vru2.c.id))]). \
-            where(vru2.c.id == None)
+            where(vru2.c.id is None)
         vms_cpu_mhz = dict(self.connection.execute(sel).fetchall())
         vms_uuids = dict(self.vms.select().execute().fetchall())
 
@@ -90,7 +88,7 @@ class Database(object):
         return vms_last_mhz
 
     def select_vm_id(self, uuid):
-        """ Select the ID of a VM by the VM UUID, or insert a new record.
+        """Select the ID of a VM by the VM UUID, or insert a new record.
 
         :param uuid: The UUID of a VM.
         :return: The ID of the VM.
@@ -105,7 +103,7 @@ class Database(object):
             return int(row['id'])
 
     def insert_vm_cpu_mhz(self, data):
-        """ Insert a set of CPU MHz values for a set of VMs.
+        """Insert a set of CPU MHz values for a set of VMs.
 
         :param data: A dictionary of VM UUIDs and CPU MHz values.
         """
@@ -118,7 +116,7 @@ class Database(object):
             self.vm_resource_usage.insert().execute(query)
 
     def update_host(self, hostname, cpu_mhz, cpu_cores, ram):
-        """ Insert new or update the corresponding host record.
+        """Insert new or update the corresponding host record.
 
         :param hostname: A host name.
         :param cpu_mhz: The total CPU frequency of the host in MHz.
@@ -147,7 +145,7 @@ class Database(object):
             return int(row['id'])
 
     def insert_host_cpu_mhz(self, hostname, cpu_mhz):
-        """ Insert a CPU MHz value for a host.
+        """Insert a CPU MHz value for a host.
 
         :param hostname: A host name.
         :param cpu_mhz: The CPU usage of the host in MHz.
@@ -157,7 +155,7 @@ class Database(object):
             cpu_mhz=cpu_mhz)
 
     def select_cpu_mhz_for_host(self, hostname, n):
-        """ Select n last values of CPU MHz for a host.
+        """Select n last values of CPU MHz for a host.
 
         :param hostname: A host name.
         :param n: The number of last values to select.
@@ -173,7 +171,7 @@ class Database(object):
         return list(reversed([int(x[0]) for x in res]))
 
     def select_last_cpu_mhz_for_hosts(self):
-        """ Select the last value of CPU MHz for all the hosts.
+        """Select the last value of CPU MHz for all the hosts.
 
         :return: A dict of host names to the last CPU MHz values.
         """
@@ -183,7 +181,7 @@ class Database(object):
             hru1.outerjoin(hru2, and_(
                 hru1.c.host_id == hru2.c.host_id,
                 hru1.c.id < hru2.c.id))]). \
-            where(hru2.c.id == None)
+            where(hru2.c.id is None)
         hosts_cpu_mhz = dict(self.connection.execute(sel).fetchall())
 
         sel = select([self.hosts.c.id, self.hosts.c.hostname])
@@ -198,7 +196,7 @@ class Database(object):
         return hosts_last_mhz
 
     def select_host_characteristics(self):
-        """ Select the characteristics of all the hosts.
+        """Select the characteristics of all the hosts.
 
         :return: Three dicts of hostnames to CPU MHz, cores, and RAM.
         """
@@ -213,7 +211,7 @@ class Database(object):
         return hosts_cpu_mhz, hosts_cpu_cores, hosts_ram
 
     def select_host_id(self, hostname):
-        """ Select the ID of a host.
+        """Select the ID of a host.
 
         :param hostname: A host name.
         :return: The ID of the host.
@@ -226,7 +224,7 @@ class Database(object):
         return int(row['id'])
 
     def select_host_ids(self):
-        """ Select the IDs of all the hosts.
+        """Select the IDs of all the hosts.
 
         :return: A dict of host names to IDs.
         """
@@ -234,7 +232,7 @@ class Database(object):
                     for x in self.hosts.select().execute().fetchall())
 
     def cleanup_vm_resource_usage(self, datetime_threshold):
-        """ Delete VM resource usage data older than the threshold.
+        """Delete VM resource usage data older than the threshold.
 
         :param datetime_threshold: A datetime threshold.
         """
@@ -243,7 +241,7 @@ class Database(object):
                 self.vm_resource_usage.c.timestamp < datetime_threshold))
 
     def cleanup_host_resource_usage(self, datetime_threshold):
-        """ Delete host resource usage data older than the threshold.
+        """Delete host resource usage data older than the threshold.
 
         :param datetime_threshold: A datetime threshold.
         """
@@ -252,7 +250,7 @@ class Database(object):
                 self.host_resource_usage.c.timestamp < datetime_threshold))
 
     def insert_host_states(self, hosts):
-        """ Insert host states for a set of hosts.
+        """Insert host states for a set of hosts.
 
         :param hosts: A dict of hostnames to states (0, 1).
         """
@@ -264,7 +262,7 @@ class Database(object):
             self.host_states.insert(), to_insert)
 
     def select_host_states(self):
-        """ Select the current states of all the hosts.
+        """Select the current states of all the hosts.
 
         :return: A dict of host names to states.
         """
@@ -274,7 +272,7 @@ class Database(object):
             hs1.outerjoin(hs2, and_(
                 hs1.c.host_id == hs2.c.host_id,
                 hs1.c.id < hs2.c.id))]). \
-            where(hs2.c.id == None)
+            where(hs2.c.id is None)
         data = dict(self.connection.execute(sel).fetchall())
         host_ids = self.select_host_ids()
         host_states = {}
@@ -286,7 +284,7 @@ class Database(object):
         return host_states
 
     def select_active_hosts(self):
-        """ Select the currently active hosts.
+        """Select the currently active hosts.
 
         :return: A list of host names.
         """
@@ -295,7 +293,7 @@ class Database(object):
                 if state == 1]
 
     def select_inactive_hosts(self):
-        """ Select the currently inactive hosts.
+        """Select the currently inactive hosts.
 
         :return: A list of host names.
         """
@@ -304,7 +302,7 @@ class Database(object):
                 if state == 0]
 
     def insert_host_overload(self, hostname, overload):
-        """ Insert whether a host is overloaded.
+        """Insert whether a host is overloaded.
 
         :param hostname: A host name.
         :param overload: Whether the host is overloaded.
@@ -314,7 +312,7 @@ class Database(object):
             overload=int(overload))
 
     def insert_vm_migration(self, vm, hostname):
-        """ Insert a VM migration.
+        """Insert a VM migration.
 
         :param hostname: A VM UUID.
         :param hostname: A host name.

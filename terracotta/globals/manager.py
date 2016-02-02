@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" The main global manager module.
+"""The main global manager module.
 
 The global manager is deployed on the management host and is
 responsible for making VM placement decisions and initiating VM
@@ -105,7 +105,7 @@ CONF.register_opts(global_mgr_ops)
 
 
 def host_mac(host):
-    """ Get mac address of a host.
+    """Get mac address of a host.
 
     :param host: A host name.
     :return: The mac address of the host.
@@ -123,7 +123,7 @@ def host_mac(host):
 
 
 def flavors_ram(nova):
-    """ Get a dict of flavor IDs to the RAM limits.
+    """Get a dict of flavor IDs to the RAM limits.
 
     :param nova: A Nova client.
     :return: A dict of flavor IDs to the RAM limits.
@@ -132,7 +132,7 @@ def flavors_ram(nova):
 
 
 def vms_ram_limit(nova, vms):
-    """ Get the RAM limit from the flavors of the VMs.
+    """Get the RAM limit from the flavors of the VMs.
 
     :param nova: A Nova client.
     :param vms: A list of VM UUIDs.
@@ -150,7 +150,7 @@ def vms_ram_limit(nova, vms):
 
 
 def host_used_ram(nova, host):
-    """ Get the used RAM of the host using the Nova API.
+    """Get the used RAM of the host using the Nova API.
 
     :param nova: A Nova client.
     :param host: A host name.
@@ -163,7 +163,7 @@ def host_used_ram(nova, host):
 
 
 def vms_by_hosts(nova, hosts):
-    """ Get a map of host names to VMs using the Nova API.
+    """Get a map of host names to VMs using the Nova API.
 
     :param nova: A Nova client.
     :param hosts: A list of host names.
@@ -176,28 +176,28 @@ def vms_by_hosts(nova, hosts):
 
 
 def vms_by_host(nova, host):
-    """ Get VMs from the specified host using the Nova API.
+    """Get VMs from the specified host using the Nova API.
 
     :param nova: A Nova client.
     :param host: A host name.
     :return: A list of VM UUIDs from the specified host.
     """
     return [str(vm.id) for vm in nova.servers.list()
-            if (vm_hostname(vm) == host and str(
-            getattr(vm, 'OS-EXT-STS:vm_state')) == 'active')]
+            if (vm_hostname(vm) == host and str(getattr(
+                vm, 'OS-EXT-STS:vm_state')) == 'active')]
 
 
 def vm_hostname(vm):
-    """ Get the name of the host where VM is running.
+    """Get the name of the host where VM is running.
 
     :param vm: A Nova VM object.
     :return: The hostname.
     """
-    return str(getattr(vm, 'OS-EXT-SRV-ATTR:host'))
+    return str(vm.get('OS-EXT-SRV-ATTR:host'))
 
 
 def migrate_vms(db, nova, vm_instance_directory, placement, block_migration):
-    """ Synchronously live migrate a set of VMs.
+    """Synchronously live migrate a set of VMs.
 
     :param db: The database object.
     :param nova: A Nova client.
@@ -232,9 +232,8 @@ def migrate_vms(db, nova, vm_instance_directory, placement, block_migration):
                     db.insert_vm_migration(vm_uuid, placement[vm_uuid])
                     LOG.info('Completed migration of VM %s to %s',
                              vm_uuid, placement[vm_uuid])
-                elif time.time() - start_time > 300 and \
-                                vm_hostname(vm) != placement[vm_uuid] and \
-                                vm.status == u'ACTIVE':
+                elif time.time() - start_time > 300 and vm_hostname(
+                        vm) != placement[vm_uuid] and vm.status == u'ACTIVE':
                     vm_pair.remove(vm_uuid)
                     retry_placement[vm_uuid] = placement[vm_uuid]
                     LOG.warning('Time-out for migration of VM %s to %s, ' +
@@ -253,7 +252,7 @@ def migrate_vms(db, nova, vm_instance_directory, placement, block_migration):
 
 
 def migrate_vm(nova, vm_instance_directory, vm, host, block_migration):
-    """ Live migrate a VM.
+    """Live migrate a VM.
 
     :param nova: A Nova client.
     :param vm_instance_directory: The VM instance directory.
@@ -269,7 +268,7 @@ def migrate_vm(nova, vm_instance_directory, vm, host, block_migration):
 
 
 def switch_hosts_off(db, sleep_command, hosts):
-    """ Switch hosts to a low-power mode.
+    """Switch hosts to a low-power mode.
 
     :param db: The database object.
     :param sleep_command: A Shell command to switch off a host.
@@ -290,7 +289,7 @@ class GlobalManager(object):
         self.switch_hosts_on(self.state['compute_hosts'])
 
     def init_state(self):
-        """ Initialize a dict for storing the state of the global manager.
+        """Initialize a dict for storing the state of the global manager.
         """
         return {'previous_time': 0,
                 'db': db_utils.init_db(),
@@ -306,7 +305,7 @@ class GlobalManager(object):
                 'host_macs': {}}
 
     def switch_hosts_on(self, hosts):
-        """ Switch hosts to the active mode.
+        """Switch hosts to the active mode.
         """
         for host in hosts:
             if host not in self.state['host_macs']:
@@ -324,14 +323,14 @@ class GlobalManager(object):
         self.state['db'].insert_host_states(
             dict((x, 1) for x in hosts))
 
-
     def execute_underload(self, host):
-        """ Process an underloaded host: migrate all VMs from the host.
+        """Process an underloaded host: migrate all VMs from the host.
 
         1. Prepare the data about the current states of the hosts and VMs.
 
         2. Call the function specified in the `algorithm_vm_placement_factory`
-           configuration option and pass the data on the states of the hosts and VMs.
+           configuration option and pass the data on the states of the hosts
+           and VMs.
 
         3. Call the Nova API to migrate the VMs according to the placement
            determined by the `algorithm_vm_placement_factory` algorithm.
@@ -355,7 +354,7 @@ class GlobalManager(object):
         # These VMs are new and no data have been collected from them
         for host, vms in hosts_to_vms.items():
             for i, vm in enumerate(vms):
-                if not vm in vms_last_cpu:
+                if vm not in vms_last_cpu:
                     del hosts_to_vms[host][i]
 
         LOG.debug('hosts_to_vms: %s', str(hosts_to_vms))
@@ -380,7 +379,8 @@ class GlobalManager(object):
                     host_cpu_mhz += vms_last_cpu[vm]
                 else:
                     hosts_cpu_usage[host] = host_cpu_mhz
-                    hosts_ram_usage[host] = host_used_ram(state['nova'], host)
+                    hosts_ram_usage[host] = host_used_ram(
+                        self.state['nova'], host)
             else:
                 # Exclude inactive hosts
                 hosts_cpu_total.pop(host, None)
@@ -403,7 +403,8 @@ class GlobalManager(object):
         vms_cpu = {}
         for vm in vms_to_migrate:
             if vm not in vms_last_cpu:
-                LOG.info('No data yet for VM: %s - dropping the request', vm)
+                LOG.info('No data yet for VM: %s - dropping the request',
+                         vm)
                 LOG.info('Skipped an underload request')
                 return self.state
             vms_cpu[vm] = self.state['db'].select_cpu_mhz_for_vm(
@@ -414,7 +415,7 @@ class GlobalManager(object):
         # Remove VMs that are not in vms_ram
         # These instances might have been deleted
         for i, vm in enumerate(vms_to_migrate):
-            if not vm in vms_ram:
+            if vm not in vms_ram:
                 del vms_to_migrate[i]
 
         if not vms_to_migrate:
@@ -422,7 +423,7 @@ class GlobalManager(object):
             return self.state
 
         for vm in vms_cpu.keys():
-            if not vm in vms_ram:
+            if vm not in vms_ram:
                 del vms_cpu[vm]
 
         time_step = CONF.data_collector_interval
@@ -460,9 +461,8 @@ class GlobalManager(object):
         active_hosts = hosts_cpu_total.keys()
         inactive_hosts = set(self.state['compute_hosts']) - set(active_hosts)
         prev_inactive_hosts = set(self.state['db'].select_inactive_hosts())
-        hosts_to_deactivate = list(inactive_hosts
-                                   - prev_inactive_hosts
-                                   - hosts_to_keep_active)
+        hosts_to_deactivate = list(
+            inactive_hosts - prev_inactive_hosts - hosts_to_keep_active)
 
         if not placement:
             LOG.info('Nothing to migrate')
@@ -486,12 +486,13 @@ class GlobalManager(object):
         return self.state
 
     def execute_overload(self, host, vm_uuids):
-        """ Process an overloaded host: migrate the selected VMs from it.
+        """Process an overloaded host: migrate the selected VMs from it.
 
         1. Prepare the data about the current states of the hosts and VMs.
 
         2. Call the function specified in the `algorithm_vm_placement_factory`
-           configuration option and pass the data on the states of the hosts and VMs.
+           configuration option and pass the data on the states of the hosts
+           and VMs.
 
         3. Call the Nova API to migrate the VMs according to the placement
            determined by the `algorithm_vm_placement_factory` algorithm.
@@ -503,7 +504,8 @@ class GlobalManager(object):
         overloaded_host = host
         hosts_cpu_total, _, hosts_ram_total = self.state[
             'db'].select_host_characteristics()
-        hosts_to_vms = vms_by_hosts(state['nova'], self.state['compute_hosts'])
+        hosts_to_vms = vms_by_hosts(self.state['nova'],
+                                    self.state['compute_hosts'])
         vms_last_cpu = self.state['db'].select_last_cpu_mhz_for_vms()
         hosts_last_cpu = self.state['db'].select_last_cpu_mhz_for_hosts()
 
@@ -511,7 +513,7 @@ class GlobalManager(object):
         # These VMs are new and no data have been collected from them
         for host, vms in hosts_to_vms.items():
             for i, vm in enumerate(vms):
-                if not vm in vms_last_cpu:
+                if vm not in vms_last_cpu:
                     del hosts_to_vms[host][i]
 
         hosts_cpu_usage = {}
@@ -523,9 +525,9 @@ class GlobalManager(object):
                 host_cpu_mhz = hosts_last_cpu[host]
                 for vm in vms:
                     if vm not in vms_last_cpu:
-                        LOG.info('No data yet for VM: %s - skipping host %s',
-                                 vm,
-                                 host)
+                        LOG.info(
+                            'No data yet for VM: %s - skipping host %s',
+                            vm, host)
                         hosts_cpu_total.pop(host, None)
                         hosts_ram_total.pop(host, None)
                         hosts_cpu_usage.pop(host, None)
@@ -555,7 +557,9 @@ class GlobalManager(object):
         vms_cpu = {}
         for vm in vms_to_migrate:
             if vm not in vms_last_cpu:
-                LOG.info('No data yet for VM: %s - dropping the request', vm)
+                LOG.info(
+                    'No data yet for VM: %s - dropping the request',
+                    vm)
                 LOG.info('Skipped an underload request')
                 return self.state
             vms_cpu[vm] = self.state['db'].select_cpu_mhz_for_vm(
@@ -566,15 +570,16 @@ class GlobalManager(object):
         # Remove VMs that are not in vms_ram
         # These instances might have been deleted
         for i, vm in enumerate(vms_to_migrate):
-            if not vm in vms_ram:
+            if vm not in vms_ram:
                 del vms_to_migrate[i]
 
         if not vms_to_migrate:
-            LOG.info('No VMs to migrate - completed the overload request')
+            LOG.info(
+                'No VMs to migrate - completed the overload request')
             return self.state
 
         for vm in vms_cpu.keys():
-            if not vm in vms_ram:
+            if vm not in vms_ram:
                 del vms_cpu[vm]
 
         time_step = CONF.data_collector_interval
@@ -582,7 +587,7 @@ class GlobalManager(object):
             vms_ram,
             CONF.network_migration_bandwidth)
 
-        if 'vm_placement' not in state:
+        if 'vm_placement' not in self.state:
             vm_placement_params = common.parse_parameters(
                 CONF.global_manager.algorithm_vm_placement_parameters)
             vm_placement_state = None
@@ -625,7 +630,7 @@ class GlobalManager(object):
                         CONF.global_manager.block_migration)
             LOG.info('Completed overload VM migrations')
         LOG.info('Completed processing an overload request')
-        return state
+        return self.state
 
     def service(self, reason, host, vm_uuids):
         try:
@@ -635,6 +640,6 @@ class GlobalManager(object):
             else:
                 LOG.info('Processing an overload, VMs: %s', str(vm_uuids))
                 self.execute_overload(host, vm_uuids)
-        except:
+        except Exception:
             LOG.exception('Exception during request processing:')
             raise

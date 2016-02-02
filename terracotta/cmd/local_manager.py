@@ -14,16 +14,18 @@
 
 
 import eventlet
+import os
 from oslo_config import cfg
 from oslo_log import log as logging
 import oslo_messaging as messaging
+
 import sys
 from terracotta import config
-from terracotta import rpc
 from terracotta.locals import manager as local_mgr
 from terracotta.openstack.common import threadgroup
+from terracotta import rpc
 from terracotta import version
-import os
+
 
 eventlet.monkey_patch(
     os=True,
@@ -40,10 +42,9 @@ if os.path.exists(os.path.join(POSSIBLE_TOPDIR, 'terracotta', '__init__.py')):
     sys.path.insert(0, POSSIBLE_TOPDIR)
 
 
-
-
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
+
 
 def launch_local_manager(transport):
     target = messaging.Target(
@@ -71,6 +72,7 @@ def launch_local_manager(transport):
 
     server.start()
     server.wait()
+
 
 def launch_any(transport, options):
     thread = eventlet.spawn(launch_local_manager, transport)
@@ -117,4 +119,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
