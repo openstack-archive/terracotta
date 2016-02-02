@@ -13,4 +13,3 @@ sphinxcontrib-pecanwsme>=0.8
 sphinxcontrib-httpdomain
 mock
 flake8
-unittest
