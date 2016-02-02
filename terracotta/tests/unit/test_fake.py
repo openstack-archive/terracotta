@@ -1,11 +1,10 @@
-# Copyright 2016 Huawei Tech inc.
-# Copyright 2012 Anton Beloglazov
+# Copyright 2016 Huawei Technologies Co. Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,10 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-OpenStack Terracotta: an add-on to OpenStack implementing energy and
-performance efficient dynamic consolidation of virtual machines
-"""
+import unittest2
 
-__version__ = "0.1"
-__author__ = "Anton Beloglazov"
+
+class TestCase(unittest2.TestCase):
+
+    def setUp(self):
+        """Run before each test method to initialize test environment."""
+        super(TestCase, self).setUp()
+
+
+class FakeTest(TestCase):
+
+    def test_fake_test(self):
+        pass

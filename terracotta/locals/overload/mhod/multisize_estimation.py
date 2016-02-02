@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" Multisize sliding window workload estimation functions.
+"""Multisize sliding window workload estimation functions.
 """
 
-from itertools import islice
 from collections import deque
+from itertools import islice
 
 
 def mean(data, window_size):
-    """ Get the data mean according to the window size.
+    """Get the data mean according to the window size.
 
     :param data: A list of values.
     :param window_size: A window size.
@@ -30,7 +30,7 @@ def mean(data, window_size):
 
 
 def variance(data, window_size):
-    """ Get the data variance according to the window size.
+    """Get the data variance according to the window size.
 
     :param data: A list of values.
     :param window_size: A window size.
@@ -41,7 +41,7 @@ def variance(data, window_size):
 
 
 def acceptable_variance(probability, window_size):
-    """ Get the acceptable variance.
+    """Get the acceptable variance.
 
     :param probability: The probability to use.
     :param window_size: A window size.
@@ -51,7 +51,7 @@ def acceptable_variance(probability, window_size):
 
 
 def estimate_probability(data, window_size, state):
-    """ Get the estimated probability.
+    """Get the estimated probability.
 
     :param data: A list of data values.
     :param window_size: The window size.
@@ -62,7 +62,7 @@ def estimate_probability(data, window_size, state):
 
 
 def update_request_windows(request_windows, previous_state, current_state):
-    """ Update and return the updated request windows.
+    """Update and return the updated request windows.
 
     :param request_windows: The previous request windows.
     :param previous_state: The previous state.
@@ -75,7 +75,7 @@ def update_request_windows(request_windows, previous_state, current_state):
 
 def update_estimate_windows(estimate_windows, request_windows,
                             previous_state):
-    """ Update and return the updated estimate windows.
+    """Update and return the updated estimate windows.
 
     :param estimate_windows: The previous estimate windows.
     :param request_windows: The current request windows.
@@ -97,7 +97,7 @@ def update_estimate_windows(estimate_windows, request_windows,
 
 
 def update_variances(variances, estimate_windows, previous_state):
-    """ Updated and return the updated variances.
+    """Updated and return the updated variances.
 
     :param variances: The previous variances.
     :param estimate_windows: The current estimate windows.
@@ -118,7 +118,7 @@ def update_variances(variances, estimate_windows, previous_state):
 
 def update_acceptable_variances(acceptable_variances, estimate_windows,
                                 previous_state):
-    """ Update and return the updated acceptable variances.
+    """Update and return the updated acceptable variances.
 
     :param acceptable_variances: The previous acceptable variances.
     :param estimate_windows: The current estimate windows.
@@ -136,7 +136,7 @@ def update_acceptable_variances(acceptable_variances, estimate_windows,
 
 
 def select_window(variances, acceptable_variances, window_sizes):
-    """ Select window sizes according to the acceptable variances.
+    """Select window sizes according to the acceptable variances.
 
     :param variances: The variances.
     :param acceptable_variances: The acceptable variances.
@@ -159,7 +159,7 @@ def select_window(variances, acceptable_variances, window_sizes):
 
 
 def select_best_estimates(estimate_windows, selected_windows):
-    """ Select the best estimates according to the selected windows.
+    """Select the best estimates according to the selected windows.
 
     :param estimate_windows: The estimate windows.
     :param selected_windows: The selected window sizes.
@@ -179,7 +179,7 @@ def select_best_estimates(estimate_windows, selected_windows):
 
 
 def init_request_windows(number_of_states, max_window_size):
-    """ Initialize a request window data structure.
+    """Initialize a request window data structure.
 
     :param number_of_states: The number of states.
     :param max_window_size: The max size of the request windows.
@@ -190,7 +190,7 @@ def init_request_windows(number_of_states, max_window_size):
 
 
 def init_variances(window_sizes, number_of_states):
-    """ Initialize a variances data structure.
+    """Initialize a variances data structure.
 
     :param window_sizes: The required window sizes.
     :param number_of_states: The number of states.
@@ -206,7 +206,7 @@ def init_variances(window_sizes, number_of_states):
 
 
 def init_deque_structure(window_sizes, number_of_states):
-    """ Initialize a 3 level deque data structure.
+    """Initialize a 3 level deque data structure.
 
     :param window_sizes: The required window sizes.
     :param number_of_states: The number of states.
@@ -222,7 +222,7 @@ def init_deque_structure(window_sizes, number_of_states):
 
 
 def init_selected_window_sizes(window_sizes, number_of_states):
-    """ Initialize a selected window sizes data structure.
+    """Initialize a selected window sizes data structure.
 
     :param window_sizes: The required window sizes.
     :param number_of_states: The number of states.
