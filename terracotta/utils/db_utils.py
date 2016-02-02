@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy import *
+from sqlalchemy import create_engine
+from sqlalchemy import MetaData
 from sqlalchemy.sql import func
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Table
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -27,7 +29,7 @@ CONF = cfg.CONF
 
 
 def init_db():
-    """ Initialize the database.
+    """Initialize the database.
 
     :param sql_connection: A database connection URL.
     :return: The initialized database.
@@ -92,5 +94,6 @@ def init_db():
                            vm_resource_usage, vm_migrations, host_states,
                            host_overload)
 
-    LOG.debug('Initialized a DB connection to %s', CONF.database.sql_connection)
+    LOG.debug('Initialized a DB connection to %s',
+              CONF.database.sql_connection)
     return db

@@ -20,8 +20,8 @@ from oslo_log import log as logging
 import oslo_messaging as messaging
 import sys
 from terracotta import config
-from terracotta import rpc
 from terracotta.globals import manager as global_mgr
+from terracotta import rpc
 from terracotta import version
 
 
