@@ -212,6 +212,11 @@ database_opts = [
                     'supported by SQLAlchemy')
 ]
 
+db_cleaner_opts = [
+    cfg.StrOpt('log_directory', default='/var/log/terracotta',
+               help='db_cleaner log directory')
+]
+
 CONF = cfg.CONF
 
 CONF.register_opts(pecan_opts, group='pecan')
@@ -221,6 +226,7 @@ CONF.register_opts(global_manager_opts, group='global_manager')
 CONF.register_opts(local_manager_opts, group='local_manager')
 CONF.register_opts(collector_opts, group='collector')
 CONF.register_opts(database_opts, group='database')
+CONF.register_opts(db_cleaner_opts, group='db_cleaner')
 
 CONF.register_cli_opt(use_debugger)
 CONF.register_cli_opt(launch_opt)

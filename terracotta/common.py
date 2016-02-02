@@ -1,5 +1,5 @@
-# Copyright 2012 Anton Beloglazov
 # Copyright 2015 Huawei Technologies Co. Ltd
+# Copyright 2012 Anton Beloglazov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,18 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" The functions from this module are shared by other components.
 """
+The functions from this module are shared by other components.
+"""
+
 import json
 import numpy
 import os
 import re
 import subprocess
-import time
 
 
 def build_local_vm_path(local_data_directory):
-    """ Build the path to the local VM data directory.
+    """Build the path to the local VM data directory.
 
     :param local_data_directory: The base local data path.
     :return: The path to the local VM data directory.
@@ -33,7 +34,7 @@ def build_local_vm_path(local_data_directory):
 
 
 def build_local_host_path(local_data_directory):
-    """ Build the path to the local host data file.
+    """Build the path to the local host data file.
 
     :param local_data_directory: The base local data path.
     :return: The path to the local host data file.
@@ -42,7 +43,7 @@ def build_local_host_path(local_data_directory):
 
 
 def physical_cpu_count(vir_connection):
-    """ Get the number of physical CPUs using libvirt.
+    """Get the number of physical CPUs using libvirt.
 
     :param vir_connection: A libvirt connection object.
     :return: The number of physical CPUs.
@@ -51,7 +52,7 @@ def physical_cpu_count(vir_connection):
 
 
 def physical_cpu_mhz(vir_connection):
-    """ Get the CPU frequency in MHz using libvirt.
+    """Get the CPU frequency in MHz using libvirt.
 
     :param vir_connection: A libvirt connection object.
     :return: The CPU frequency in MHz.
@@ -60,7 +61,7 @@ def physical_cpu_mhz(vir_connection):
 
 
 def physical_cpu_mhz_total(vir_connection):
-    """ Get the sum of the core CPU frequencies in MHz using libvirt.
+    """Get the sum of the core CPU frequencies in MHz using libvirt.
 
     :param vir_connection: A libvirt connection object.
     :return: The total CPU frequency in MHz.
@@ -70,7 +71,7 @@ def physical_cpu_mhz_total(vir_connection):
 
 
 def frange(start, end, step):
-    """ A range generator for floats.
+    """A range generator for floats.
 
     :param start: The starting value.
     :param end: The end value.
@@ -82,7 +83,7 @@ def frange(start, end, step):
 
 
 def call_function_by_name(name, args):
-    """ Call a function specified by a fully qualified name.
+    """Call a function specified by a fully qualified name.
 
     :param name: A fully qualified name of a function.
     :param args: A list of positional arguments of the function.
@@ -97,7 +98,7 @@ def call_function_by_name(name, args):
 
 
 def parse_parameters(params):
-    """ Parse algorithm parameters from the config file.
+    """Parse algorithm parameters from the config file.
 
     :param params: JSON encoded parameters.
     :return: A dict of parameters.
@@ -107,7 +108,7 @@ def parse_parameters(params):
 
 
 def parse_compute_hosts(compute_hosts):
-    """ Transform a coma-separated list of host names into a list.
+    """Transform a coma-separated list of host names into a list.
 
     :param compute_hosts: A coma-separated list of host names.
     :return: A list of host names.
@@ -116,7 +117,7 @@ def parse_compute_hosts(compute_hosts):
 
 
 def calculate_migration_time(vms, bandwidth):
-    """ Calculate the mean migration time from VM RAM usage data.
+    """Calculate the mean migration time from VM RAM usage data.
 
     :param vms: A map of VM UUIDs to the corresponding maximum RAM in MB.
     :param bandwidth: The network bandwidth in MB/s.
@@ -126,7 +127,7 @@ def calculate_migration_time(vms, bandwidth):
 
 
 def execute_on_hosts(hosts, commands):
-    """ Execute Shell command on hosts over SSH.
+    """Execute Shell command on hosts over SSH.
 
     :param hosts: A list of host names.
     :param commands: A list of Shell commands.

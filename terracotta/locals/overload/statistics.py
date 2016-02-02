@@ -12,16 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" Statistics based overload detection algorithms.
+"""Statistics based overload detection algorithms.
 """
 
+import numpy as np
 from numpy import median
 from scipy.optimize import leastsq
-import numpy as np
 
 
 def loess_factory(time_step, migration_time, params):
-    """ Creates the Loess based overload detection algorithm.
+    """Creates the Loess based overload detection algorithm.
 
     :param time_step: The length of the simulation time step in seconds.
     :param migration_time: The VM migration time in time seconds.
@@ -39,7 +39,7 @@ def loess_factory(time_step, migration_time, params):
 
 
 def loess_robust_factory(time_step, migration_time, params):
-    """ Creates the robust Loess based overload detection algorithm.
+    """Creates the robust Loess based overload detection algorithm.
 
     :param time_step: The length of the simulation time step in seconds.
     :param migration_time: The VM migration time in time seconds.
@@ -57,7 +57,7 @@ def loess_robust_factory(time_step, migration_time, params):
 
 
 def mad_threshold_factory(time_step, migration_time, params):
-    """ Creates the MAD based utilization threshold algorithm.
+    """Creates the MAD based utilization threshold algorithm.
 
     :param time_step: The length of the simulation time step in seconds.
     :param migration_time: The VM migration time in time seconds.
@@ -72,7 +72,7 @@ def mad_threshold_factory(time_step, migration_time, params):
 
 
 def iqr_threshold_factory(time_step, migration_time, params):
-    """ Creates the IQR based utilization threshold algorithm.
+    """Creates the IQR based utilization threshold algorithm.
 
     :param time_step: The length of the simulation time step in seconds.
     :param migration_time: The VM migration time in time seconds.
@@ -87,7 +87,7 @@ def iqr_threshold_factory(time_step, migration_time, params):
 
 
 def loess(threshold, param, length, migration_time, utilization):
-    """ The Loess based overload detection algorithm.
+    """The Loess based overload detection algorithm.
 
     :param threshold: The CPU utilization threshold.
     :param param: The safety parameter.
@@ -105,7 +105,7 @@ def loess(threshold, param, length, migration_time, utilization):
 
 
 def loess_robust(threshold, param, length, migration_time, utilization):
-    """ The robust Loess based overload detection algorithm.
+    """The robust Loess based overload detection algorithm.
 
     :param threshold: The CPU utilization threshold.
     :param param: The safety parameter.
@@ -122,8 +122,9 @@ def loess_robust(threshold, param, length, migration_time, utilization):
                           utilization)
 
 
-def loess_abstract(estimator, threshold, param, length, migration_time, utilization):
-    """ The abstract Loess algorithm.
+def loess_abstract(estimator, threshold, param, length, migration_time,
+                   utilization):
+    """The abstract Loess algorithm.
 
     :param estimator: A parameter estimation function.
     :param threshold: The CPU utilization threshold.
@@ -141,7 +142,7 @@ def loess_abstract(estimator, threshold, param, length, migration_time, utilizat
 
 
 def mad_threshold(param, limit, utilization):
-    """ The MAD based threshold algorithm.
+    """The MAD based threshold algorithm.
 
     :param param: The safety parameter.
     :param limit: The minimum allowed length of the utilization history.
@@ -154,7 +155,7 @@ def mad_threshold(param, limit, utilization):
 
 
 def iqr_threshold(param, limit, utilization):
-    """ The IQR based threshold algorithm.
+    """The IQR based threshold algorithm.
 
     :param param: The safety parameter.
     :param limit: The minimum allowed length of the utilization history.
@@ -167,7 +168,7 @@ def iqr_threshold(param, limit, utilization):
 
 
 def utilization_threshold_abstract(f, limit, utilization):
-    """ The abstract utilization threshold algorithm.
+    """The abstract utilization threshold algorithm.
 
     :param f: A function to calculate the utilization threshold.
     :param limit: The minimum allowed length of the utilization history.
@@ -180,7 +181,7 @@ def utilization_threshold_abstract(f, limit, utilization):
 
 
 def mad(data):
-    """ Calculate the Median Absolute Deviation from the data.
+    """Calculate the Median Absolute Deviation from the data.
 
     :param data: The data to analyze.
     :return: The calculated MAD.
@@ -190,7 +191,7 @@ def mad(data):
 
 
 def iqr(data):
-    """ Calculate the Interquartile Range from the data.
+    """Calculate the Interquartile Range from the data.
 
     :param data: The data to analyze.
     :return: The calculated IQR.
@@ -203,7 +204,7 @@ def iqr(data):
 
 
 def loess_parameter_estimates(data):
-    """ Calculate Loess parameter estimates.
+    """Calculate Loess parameter estimates.
 
     :param data: A data set.
     :return: The parameter estimates.
@@ -221,7 +222,7 @@ def loess_parameter_estimates(data):
 
 
 def loess_robust_parameter_estimates(data):
-    """ Calculate Loess robust parameter estimates.
+    """Calculate Loess robust parameter estimates.
 
     :param data: A data set.
     :return: The parameter estimates.
@@ -245,7 +246,7 @@ def loess_robust_parameter_estimates(data):
 
 
 def tricube_weights(n):
-    """ Generates a list of weights according to the tricube function.
+    """Generates a list of weights according to the tricube function.
 
     :param n: The number of weights to generate.
     :return: A list of generated weights.
@@ -258,7 +259,7 @@ def tricube_weights(n):
 
 
 def tricube_bisquare_weights(data):
-    """ Generates a weights according to the tricube bisquare function.
+    """Generates a weights according to the tricube bisquare function.
 
     :param data: The input data.
     :return: A list of generated weights.

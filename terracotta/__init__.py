@@ -1,3 +1,4 @@
+# Copyright 2016 Huawei Tech inc.
 # Copyright 2012 Anton Beloglazov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +14,9 @@
 # limitations under the License.
 
 """
-OpenStack Neat :: an add-on to OpenStack implementing energy and performance efficient dynamic consolidation of virtual machines
+OpenStack Terracotta: an add-on to OpenStack implementing energy and
+performance efficient dynamic consolidation of virtual machines
 """
+
 __version__ = "0.1"
-__author__  = "Anton Beloglazov"
+__author__ = "Anton Beloglazov"
