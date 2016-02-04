@@ -106,9 +106,9 @@ import os
 
 from oslo_config import cfg
 from oslo_log import log as logging
+from oslo_service import periodic_task
 
 from terracotta import common
-from terracotta.openstack.common import periodic_task
 from terracotta.utils import db_utils
 
 

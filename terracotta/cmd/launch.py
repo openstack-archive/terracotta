@@ -12,19 +12,19 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import sys
 
 import eventlet
 from oslo_config import cfg
 from oslo_log import log as logging
 import oslo_messaging as messaging
+from oslo_service import threadgroup
 
-import sys
 from terracotta.api import app
 from terracotta import config
 from terracotta.globals import manager as global_mgr
 from terracotta.locals import collector
 from terracotta.locals import manager as local_mgr
-from terracotta.openstack.common import threadgroup
 from terracotta import rpc
 from terracotta import version
 from wsgiref import simple_server
