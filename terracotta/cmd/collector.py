@@ -11,17 +11,17 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-
+import os
+import sys
 
 import eventlet
-import os
 from oslo_config import cfg
 from oslo_log import log as logging
 import oslo_messaging as messaging
-import sys
+from oslo_service import threadgroup
+
 from terracotta import config
 from terracotta.locals import collector
-from terracotta.openstack.common import threadgroup
 from terracotta import rpc
 from terracotta import version
 
