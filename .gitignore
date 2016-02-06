@@ -40,6 +40,5 @@ subunit.log
 .pydevproject
 .idea
 .DS_Store
-etc/*.conf
 tools/lintstack.head.py
 tools/pylint_exceptions
