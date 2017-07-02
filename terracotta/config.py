@@ -254,7 +254,7 @@ def parse_args(args=None, usage=None, default_config_files=None):
     )
 
 
-def _config_options():
+def config_options():
     return [(None, default_opts),
             (_API_GROUP, api_opts),
             (_PECAN_GROUP, pecan_opts),
