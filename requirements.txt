@@ -23,7 +23,7 @@ keystonemiddleware>=4.12.0 # Apache-2.0
 libvirt-python>=1.2.5 # LGPLv2+
 netaddr!=0.7.16,>=0.7.13 # BSD
 Mako>=0.4.0 # MIT
-#numpy # This is not in global requirements These packages are not availabe now
-#scipy # This is not in global requirements These packages are not availabe now
+#numpy # This is not in global requirements These packages are not available now
+#scipy # This is not in global requirements These packages are not available now
 netifaces>=0.10.4 # MIT
 # TODO fix numpy and scipy
