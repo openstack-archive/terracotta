@@ -16,7 +16,7 @@
 """The database cleaner module.
 
 The database cleaner periodically cleans up the data on resource usage
-by VMs stored in the database. This is requried to avoid excess growth
+by VMs stored in the database. This is required to avoid excess growth
 of the database size.
 """
 
